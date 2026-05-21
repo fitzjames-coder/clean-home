@@ -8,6 +8,7 @@ import { ArrowLeft, Tag } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { Room, Tool, SupplyTag, RoomSupply } from "@/lib/database.types";
 import { ROOM_ICONS, TOOL_ORDER, HOUSEHOLD_CODE_KEY } from "@/lib/constants";
+import { logError } from "@/lib/errors";
 import ToolCard from "@/components/ToolCard";
 
 type LinkedSupply = RoomSupply & { supply_tag: SupplyTag };
@@ -35,6 +36,9 @@ export default function RoomDetailPage() {
         .order("created_at"),
     ]);
 
+    if (roomRes.error) logError("RoomDetailPage.loadData — room", roomRes.error);
+    if (toolsRes.error) logError("RoomDetailPage.loadData — tools", toolsRes.error);
+
     if (roomRes.data) {
       setRoom(roomRes.data);
       setRemarks(roomRes.data.remarks || "");
@@ -53,11 +57,12 @@ export default function RoomDetailPage() {
     // Load household's supply tags
     const householdId = localStorage.getItem(HOUSEHOLD_CODE_KEY);
     if (householdId) {
-      const { data: supplyData } = await supabase
+      const { data: supplyData, error: supplyErr } = await supabase
         .from("clean_home_supply_tags")
         .select()
         .eq("household_id", householdId)
         .order("name_en");
+      if (supplyErr) logError("RoomDetailPage.loadData — supply_tags", supplyErr);
       setSupplies(supplyData || []);
     }
 
@@ -69,10 +74,11 @@ export default function RoomDetailPage() {
 
   const loadLinkedSupplies = async () => {
     if (!id) return;
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("clean_home_room_supplies")
       .select("*, supply_tag:clean_home_supply_tags(*)")
       .eq("room_id", id);
+    if (error) logError("RoomDetailPage.loadLinkedSupplies", error);
     setLinkedSupplies((data as LinkedSupply[]) || []);
   };
 
@@ -83,10 +89,11 @@ export default function RoomDetailPage() {
   async function saveRemarks() {
     if (!room || remarks === room.remarks) return;
     setSavingRemarks(true);
-    await supabase
+    const { error } = await supabase
       .from("clean_home_rooms")
       .update({ remarks })
       .eq("id", id);
+    if (error) logError("RoomDetailPage.saveRemarks", error);
     setRoom((prev) => prev ? { ...prev, remarks } : prev);
     setSavingRemarks(false);
   }

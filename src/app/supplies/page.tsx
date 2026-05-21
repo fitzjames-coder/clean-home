@@ -8,6 +8,7 @@ import { ArrowLeft, Plus, Camera } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { SupplyTag } from "@/lib/database.types";
 import { HOUSEHOLD_CODE_KEY } from "@/lib/constants";
+import { extractErrorMessage, logError } from "@/lib/errors";
 import SupplyTagCard from "@/components/SupplyTagCard";
 
 export default function SuppliesPage() {
@@ -25,11 +26,12 @@ export default function SuppliesPage() {
   const fileRef = useRef<HTMLInputElement>(null);
 
   const loadSupplies = useCallback(async (hid: string) => {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("clean_home_supply_tags")
       .select()
       .eq("household_id", hid)
       .order("name_en");
+    if (error) logError("SuppliesPage.loadSupplies", error);
     setSupplies(data || []);
     setLoading(false);
   }, []);
@@ -52,11 +54,14 @@ export default function SuppliesPage() {
       const { error: uploadErr } = await supabase.storage
         .from("clean-home-photos")
         .upload(path, file, { upsert: true });
-      if (uploadErr) throw uploadErr;
+      if (uploadErr) {
+        logError("SuppliesPage.handlePhotoUpload", uploadErr);
+        throw uploadErr;
+      }
       const { data } = supabase.storage.from("clean-home-photos").getPublicUrl(path);
       setNewPhotoUrl(data.publicUrl);
     } catch (e) {
-      console.error("Upload failed:", e);
+      logError("SuppliesPage.handlePhotoUpload", e);
     } finally {
       setUploading(false);
     }
@@ -81,14 +86,18 @@ export default function SuppliesPage() {
         })
         .select()
         .single();
-      if (dbErr) throw dbErr;
+      if (dbErr) {
+        logError("SuppliesPage.handleAdd — insert", dbErr);
+        throw dbErr;
+      }
       setSupplies((prev) => [...prev, data].sort((a, b) => a.name_en.localeCompare(b.name_en)));
       setNewNameEn("");
       setNewNameDe("");
       setNewPhotoUrl("");
       setShowAdd(false);
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : "Failed to add supply");
+      logError("SuppliesPage.handleAdd", e);
+      setError(extractErrorMessage(e));
     } finally {
       setSaving(false);
     }

@@ -8,6 +8,7 @@ import { Plus, Trash2, Share2, Tag, Settings } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { Room, Household } from "@/lib/database.types";
 import { ROOM_ICONS, HOUSEHOLD_CODE_KEY } from "@/lib/constants";
+import { logError } from "@/lib/errors";
 import HouseholdModal from "@/components/HouseholdModal";
 import AddRoomModal from "@/components/AddRoomModal";
 
@@ -23,11 +24,12 @@ export default function HomePage() {
   const [showCode, setShowCode] = useState(false);
 
   const loadHousehold = useCallback(async (id: string) => {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("clean_home_households")
       .select()
       .eq("id", id)
       .single();
+    if (error) logError("HomePage.loadHousehold", error);
     if (data) {
       setHousehold(data);
       loadRooms(data.id);
@@ -39,12 +41,13 @@ export default function HomePage() {
   }, []);
 
   const loadRooms = async (householdId: string) => {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("clean_home_rooms")
       .select()
       .eq("household_id", householdId)
       .order("sort_order", { ascending: true })
       .order("created_at", { ascending: true });
+    if (error) logError("HomePage.loadRooms", error);
     setRooms(data || []);
     setLoading(false);
   };
@@ -61,7 +64,8 @@ export default function HomePage() {
 
   async function deleteRoom(id: string) {
     setDeletingId(id);
-    await supabase.from("clean_home_rooms").delete().eq("id", id);
+    const { error } = await supabase.from("clean_home_rooms").delete().eq("id", id);
+    if (error) logError("HomePage.deleteRoom", error);
     setRooms((prev) => prev.filter((r) => r.id !== id));
     setDeletingId(null);
     setConfirmDeleteId(null);

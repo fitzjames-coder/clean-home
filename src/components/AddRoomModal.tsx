@@ -5,6 +5,7 @@ import { X } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { Room, RoomIcon } from "@/lib/database.types";
 import { TOOL_ORDER } from "@/lib/constants";
+import { extractErrorMessage, logError } from "@/lib/errors";
 import RoomIconPicker from "./RoomIconPicker";
 
 interface AddRoomModalProps {
@@ -33,7 +34,10 @@ export default function AddRoomModal({ householdId, onClose, onSuccess }: AddRoo
         .insert({ household_id: householdId, name: name.trim(), icon })
         .select()
         .single();
-      if (roomErr) throw roomErr;
+      if (roomErr) {
+        logError("AddRoomModal — insert room", roomErr);
+        throw roomErr;
+      }
 
       // Create default tools (all active)
       const toolRows = TOOL_ORDER.map((tool_type) => ({
@@ -46,11 +50,15 @@ export default function AddRoomModal({ householdId, onClose, onSuccess }: AddRoo
       const { error: toolErr } = await supabase
         .from("clean_home_tools")
         .insert(toolRows);
-      if (toolErr) throw toolErr;
+      if (toolErr) {
+        logError("AddRoomModal — insert tools", toolErr);
+        throw toolErr;
+      }
 
       onSuccess(room);
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : "Failed to create room");
+      logError("AddRoomModal.handleSubmit", e);
+      setError(extractErrorMessage(e));
     } finally {
       setLoading(false);
     }

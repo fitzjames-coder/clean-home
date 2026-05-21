@@ -4,6 +4,7 @@ export const dynamic = "force-dynamic";
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { Plus, Trash2, Share2, Tag, Settings } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { Room, Household } from "@/lib/database.types";
@@ -97,7 +98,20 @@ export default function HomePage() {
         <div className="px-5 pt-12 pb-6">
           <div className="flex items-start justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">🏠 Clean Home</h1>
+              <div className="flex items-center gap-3">
+                <Image
+                  src="/icon.png"
+                  alt="Clean Home"
+                  width={44}
+                  height={44}
+                  className="rounded-xl flex-shrink-0"
+                  onError={(e) => {
+                    // Fall back to SVG if PNG not yet placed
+                    (e.target as HTMLImageElement).src = "/icon.svg";
+                  }}
+                />
+                <h1 className="text-3xl font-bold text-gray-900">Clean Home</h1>
+              </div>
               {household && (
                 <button
                   onClick={() => setShowCode(!showCode)}
@@ -163,7 +177,7 @@ export default function HomePage() {
                     className="flex items-center gap-4 p-4 w-full text-left hover:bg-gray-50/50 transition-colors"
                   >
                     {/* Icon */}
-                    <div className="w-14 h-14 flex-shrink-0 rounded-2xl bg-gradient-to-br from-blue-50 to-teal-50 flex items-center justify-center text-3xl shadow-inner">
+                    <div className="w-14 h-14 flex-shrink-0 rounded-2xl bg-gradient-to-br from-[#ddeeff] to-[#d5f7ec] flex items-center justify-center text-3xl shadow-inner">
                       {getRoomIcon(room.icon)}
                     </div>
 
@@ -222,7 +236,7 @@ export default function HomePage() {
 
       {/* Bottom FAB bar */}
       {household && (
-        <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md px-5 pb-8 pt-3 bg-gradient-to-t from-[#f0f4ff] to-transparent pointer-events-none">
+        <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md px-5 pb-8 pt-3 bg-gradient-to-t from-[#f5f9ff] to-transparent pointer-events-none">
           <div className="flex gap-3 pointer-events-auto">
             <button
               onClick={() => router.push("/supplies")}

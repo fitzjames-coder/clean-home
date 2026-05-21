@@ -35,7 +35,7 @@ export function isDue(lastCompleted: string | null, frequency: Frequency): boole
 }
 
 export function getStatusColor(lastCompleted: string | null, frequency: Frequency): string {
-  if (!lastCompleted) return 'text-red-500';
-  if (isDue(lastCompleted, frequency)) return 'text-amber-500';
-  return 'text-brand-teal';
+  if (!lastCompleted) return 'text-gray-400';
+  if (isDue(lastCompleted, frequency)) return 'text-[#2B7FFF]';
+  return 'text-[#2ECC8F]';
 }

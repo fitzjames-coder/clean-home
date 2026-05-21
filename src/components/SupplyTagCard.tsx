@@ -4,6 +4,7 @@ import { useState, useRef } from "react";
 import { Pencil, Trash2, Check, X, Camera } from "lucide-react";
 import { SupplyTag } from "@/lib/database.types";
 import { supabase } from "@/lib/supabase";
+import { logError } from "@/lib/errors";
 
 interface SupplyTagCardProps {
   supply: SupplyTag;
@@ -29,11 +30,14 @@ export default function SupplyTagCard({ supply, onDelete, onUpdate }: SupplyTagC
       const { error: uploadErr } = await supabase.storage
         .from("clean-home-photos")
         .upload(path, file, { upsert: true });
-      if (uploadErr) throw uploadErr;
+      if (uploadErr) {
+        logError("SupplyTagCard.handlePhotoUpload", uploadErr);
+        throw uploadErr;
+      }
       const { data } = supabase.storage.from("clean-home-photos").getPublicUrl(path);
       setPhotoUrl(data.publicUrl);
     } catch (e) {
-      console.error("Upload failed:", e);
+      logError("SupplyTagCard.handlePhotoUpload", e);
     } finally {
       setUploading(false);
     }
@@ -53,15 +57,15 @@ export default function SupplyTagCard({ supply, onDelete, onUpdate }: SupplyTagC
       .eq("id", supply.id)
       .select()
       .single();
-    if (!error && data) {
-      onUpdate(data);
-    }
+    if (error) logError("SupplyTagCard.handleSave", error);
+    if (!error && data) onUpdate(data);
     setSaving(false);
     setEditing(false);
   }
 
   async function handleDelete() {
-    await supabase.from("clean_home_supply_tags").delete().eq("id", supply.id);
+    const { error } = await supabase.from("clean_home_supply_tags").delete().eq("id", supply.id);
+    if (error) logError("SupplyTagCard.handleDelete", error);
     onDelete();
   }
 

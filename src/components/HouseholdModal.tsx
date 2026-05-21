@@ -1,11 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { X, Home, Users } from "lucide-react";
+import { X, Home, Users, AlertTriangle } from "lucide-react";
 import { supabase } from "@/lib/supabase";
-import { generateHouseholdCode, } from "@/lib/utils";
+import { generateHouseholdCode } from "@/lib/utils";
 import { HOUSEHOLD_CODE_KEY } from "@/lib/constants";
 import { Household } from "@/lib/database.types";
+import { extractErrorMessage, logError } from "@/lib/errors";
 
 interface HouseholdModalProps {
   onClose: () => void;
@@ -13,6 +14,25 @@ interface HouseholdModalProps {
 }
 
 type Tab = "create" | "join";
+
+/** Returns a short, user-friendly label for common Supabase/network errors. */
+function friendlyError(raw: string): string {
+  const s = raw.toLowerCase();
+  if (s.includes('failed to fetch') || s.includes('networkerror') || s.includes('load failed')) {
+    return 'Could not reach the server. Check your internet connection and try again.';
+  }
+  if (s.includes('missing supabase')) return raw; // our own env-var message – show as-is
+  if (s.includes('jwt') || s.includes('apikey') || s.includes('anon key')) {
+    return 'Authentication configuration error. Check the Supabase anon key in environment variables.';
+  }
+  if (s.includes('does not exist') || s.includes('relation') || s.includes('42p01')) {
+    return 'Database table not found. Make sure the schema SQL has been applied in Supabase.';
+  }
+  if (s.includes('row-level security') || s.includes('rls') || s.includes('42501')) {
+    return 'Database permission error (RLS). Check Row Level Security policies in Supabase.';
+  }
+  return raw;
+}
 
 export default function HouseholdModal({ onClose, onSuccess }: HouseholdModalProps) {
   const [tab, setTab] = useState<Tab>("create");
@@ -35,11 +55,20 @@ export default function HouseholdModal({ onClose, onSuccess }: HouseholdModalPro
         .insert({ name: householdName.trim(), code })
         .select()
         .single();
-      if (dbErr) throw dbErr;
+
+      if (dbErr) {
+        logError("HouseholdModal.handleCreate — Supabase insert", dbErr);
+        throw dbErr;
+      }
+      if (!data) {
+        throw new Error("No data returned from insert — check table permissions.");
+      }
+
       localStorage.setItem(HOUSEHOLD_CODE_KEY, data.id);
       onSuccess(data);
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : "Failed to create household");
+      logError("HouseholdModal.handleCreate", e);
+      setError(friendlyError(extractErrorMessage(e)));
     } finally {
       setLoading(false);
     }
@@ -59,14 +88,26 @@ export default function HouseholdModal({ onClose, onSuccess }: HouseholdModalPro
         .select()
         .eq("code", code)
         .single();
-      if (dbErr || !data) {
-        setError("Household not found. Check the code and try again.");
+
+      if (dbErr) {
+        // PGRST116 = "0 rows" — not a real error, just means code not found
+        if ((dbErr as { code?: string }).code === 'PGRST116') {
+          setError("Household not found. Double-check the code and try again.");
+          return;
+        }
+        logError("HouseholdModal.handleJoin — Supabase select", dbErr);
+        throw dbErr;
+      }
+      if (!data) {
+        setError("Household not found. Double-check the code and try again.");
         return;
       }
+
       localStorage.setItem(HOUSEHOLD_CODE_KEY, data.id);
       onSuccess(data);
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : "Failed to join household");
+      logError("HouseholdModal.handleJoin", e);
+      setError(friendlyError(extractErrorMessage(e)));
     } finally {
       setLoading(false);
     }
@@ -143,7 +184,10 @@ export default function HouseholdModal({ onClose, onSuccess }: HouseholdModalPro
         )}
 
         {error && (
-          <p className="mt-3 text-sm text-red-500 bg-red-50 px-3 py-2 rounded-xl">{error}</p>
+          <div className="mt-3 flex gap-2 items-start bg-red-50 border border-red-100 px-3 py-2.5 rounded-xl">
+            <AlertTriangle size={15} className="text-red-400 flex-shrink-0 mt-0.5" />
+            <p className="text-sm text-red-600">{error}</p>
+          </div>
         )}
 
         <button

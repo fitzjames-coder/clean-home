@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3B8FFF;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1A6FEF;stop-opacity:1" />
+    </linearGradient>
+    <filter id="houseShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="8" stdDeviation="16" flood-color="rgba(0,0,0,0.12)"/>
+    </filter>
+    <filter id="cardShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="6" stdDeviation="12" flood-color="rgba(0,0,0,0.10)"/>
+    </filter>
+  </defs>
+
+  <!-- Blue rounded background -->
+  <rect width="1024" height="1024" rx="224" ry="224" fill="url(#bgGrad)"/>
+
+  <!-- Sparkle stars top-left -->
+  <!-- Large 4-point star -->
+  <g transform="translate(168, 168)">
+    <path d="M0,-52 C6,-18 18,-6 52,0 C18,6 6,18 0,52 C-6,18 -18,6 -52,0 C-18,-6 -6,-18 0,-52Z" fill="white" opacity="0.95"/>
+  </g>
+  <!-- Small 4-point star -->
+  <g transform="translate(248, 268)">
+    <path d="M0,-28 C3,-10 10,-3 28,0 C10,3 3,10 0,28 C-3,10 -10,3 -28,0 C-10,-3 -3,-10 0,-28Z" fill="white" opacity="0.85"/>
+  </g>
+
+  <!-- House silhouette (white, paper-cutout style) -->
+  <g filter="url(#houseShadow)">
+    <!-- House body -->
+    <path d="M180,520 L180,840 C180,860 196,876 216,876 L808,876 C828,876 844,860 844,840 L844,520 L512,260 Z" fill="white"/>
+    <!-- Roof overhang -->
+    <path d="M130,538 L512,220 L894,538 C908,550 908,568 894,574 L870,584 C858,590 844,584 836,572 L512,300 L188,572 C180,584 166,590 154,584 L130,574 C116,568 116,550 130,538Z" fill="white"/>
+    <!-- Chimney -->
+    <rect x="672" y="256" width="68" height="110" rx="8" fill="white"/>
+  </g>
+
+  <!-- Window (2x2 blue grid) inside house -->
+  <rect x="428" y="360" width="72" height="72" rx="10" fill="#90C2FF"/>
+  <rect x="512" y="360" width="72" height="72" rx="10" fill="#6AADFF"/>
+  <rect x="428" y="444" width="72" height="72" rx="10" fill="#6AADFF"/>
+  <rect x="512" y="444" width="72" height="72" rx="10" fill="#90C2FF"/>
+
+  <!-- Green leaves bottom-left -->
+  <ellipse cx="248" cy="830" rx="58" ry="96" transform="rotate(-30,248,830)" fill="#2ECC8F"/>
+  <ellipse cx="192" cy="800" rx="44" ry="76" transform="rotate(-50,192,800)" fill="#25B87D"/>
+  <!-- Green leaves bottom-right -->
+  <ellipse cx="776" cy="830" rx="58" ry="96" transform="rotate(30,776,830)" fill="#2ECC8F"/>
+  <ellipse cx="832" cy="800" rx="44" ry="76" transform="rotate(50,832,800)" fill="#25B87D"/>
+
+  <!-- Clipboard card (white, slightly off-centre, overlapping house) -->
+  <g filter="url(#cardShadow)">
+    <rect x="320" y="500" width="420" height="360" rx="28" fill="white"/>
+  </g>
+  <!-- Clipboard top clip (teal) -->
+  <rect x="466" y="484" width="92" height="36" rx="18" fill="#2ECC8F"/>
+
+  <!-- Checklist rows -->
+  <!-- Row 1 -->
+  <circle cx="376" cy="592" r="22" fill="#2ECC8F"/>
+  <path d="M364,592 L373,603 L390,581" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <rect x="414" y="582" width="180" height="14" rx="7" fill="#C8D8F0"/>
+  <!-- Row 2 -->
+  <circle cx="376" cy="660" r="22" fill="#2ECC8F"/>
+  <path d="M364,660 L373,671 L390,649" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <rect x="414" y="650" width="150" height="14" rx="7" fill="#C8D8F0"/>
+  <!-- Row 3 -->
+  <circle cx="376" cy="728" r="22" fill="#2ECC8F"/>
+  <path d="M364,728 L373,739 L390,717" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <rect x="414" y="718" width="120" height="14" rx="7" fill="#C8D8F0"/>
+
+  <!-- Big teal checkmark circle (bottom-right of card) -->
+  <circle cx="686" cy="820" r="72" fill="#2ECC8F" filter="url(#cardShadow)"/>
+  <circle cx="686" cy="820" r="72" fill="none" stroke="white" stroke-width="5"/>
+  <path d="M654,820 L676,844 L720,796" stroke="white" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+</svg>

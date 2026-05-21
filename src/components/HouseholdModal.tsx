@@ -125,11 +125,11 @@ export default function HouseholdModal({ onClose, onSuccess }: HouseholdModalPro
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-2 mb-6 bg-gray-100 p-1 rounded-2xl">
+        <div className="flex gap-2 mb-6 bg-[#eef4ff] p-1 rounded-2xl">
           <button
             onClick={() => { setTab("create"); setError(""); }}
             className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition-all ${
-              tab === "create" ? "bg-white text-[#2B7FFF] shadow-sm" : "text-gray-500"
+              tab === "create" ? "bg-white text-[#2B7FFF] shadow-sm" : "text-[#5a7ab8]"
             }`}
           >
             <Home size={16} /> Create
@@ -137,7 +137,7 @@ export default function HouseholdModal({ onClose, onSuccess }: HouseholdModalPro
           <button
             onClick={() => { setTab("join"); setError(""); }}
             className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition-all ${
-              tab === "join" ? "bg-white text-[#2B7FFF] shadow-sm" : "text-gray-500"
+              tab === "join" ? "bg-white text-[#2B7FFF] shadow-sm" : "text-[#5a7ab8]"
             }`}
           >
             <Users size={16} /> Join

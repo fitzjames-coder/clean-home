@@ -103,7 +103,7 @@ export default function ToolCard({
             <p className="text-xs text-gray-400">Inactive</p>
           </div>
         </div>
-        <button onClick={toggleActive} className="p-2 rounded-full hover:bg-gray-100 transition-colors">
+        <button onClick={toggleActive} className="p-2 rounded-full hover:bg-[#eef4ff] transition-colors">
           <ToggleLeft size={22} className="text-gray-400" />
         </button>
       </div>
@@ -111,7 +111,7 @@ export default function ToolCard({
   }
 
   return (
-    <div className={`card overflow-hidden transition-all ${due ? "border-amber-100" : "border-green-50"}`}>
+    <div className={`card overflow-hidden transition-all ${due ? "border-amber-100" : "border-[#2ECC8F]/15"}`}>
       {/* Main row */}
       <div className="flex items-center gap-3 p-4">
         {/* Mark Done button */}
@@ -121,7 +121,7 @@ export default function ToolCard({
           className={`w-12 h-12 flex-shrink-0 rounded-2xl flex items-center justify-center text-2xl transition-all active:scale-90 ${
             due
               ? "bg-amber-50 hover:bg-amber-100 border border-amber-200"
-              : "bg-green-50 hover:bg-green-100 border border-green-100"
+              : "bg-[#e0f9f0] hover:bg-[#d0f5e8] border border-[#2ECC8F]/25"
           }`}
           title="Mark as cleaned"
         >
@@ -134,7 +134,7 @@ export default function ToolCard({
             <p className="font-semibold text-gray-900 text-sm">{meta.label}</p>
             <span
               className={`text-xs font-medium px-2 py-0.5 rounded-full ${
-                due ? "bg-amber-100 text-amber-700" : "bg-green-100 text-green-700"
+                due ? "bg-amber-100 text-amber-700" : "bg-[#d0f5e8] text-[#1aaa72]"
               }`}
             >
               {FREQUENCY_META[tool.frequency].shortLabel}
@@ -150,7 +150,7 @@ export default function ToolCard({
 
         {/* Controls */}
         <div className="flex items-center gap-1">
-          <button onClick={toggleActive} title="Disable tool" className="p-2 rounded-full hover:bg-gray-100 transition-colors">
+          <button onClick={toggleActive} title="Disable tool" className="p-2 rounded-full hover:bg-[#eef4ff] transition-colors">
             <ToggleRight size={20} className="text-[#2B7FFF]" />
           </button>
           <button
@@ -176,7 +176,7 @@ export default function ToolCard({
 
       {/* Expanded section */}
       {expanded && (
-        <div className="px-4 pb-5 space-y-4 border-t border-gray-50 pt-4">
+        <div className="px-4 pb-5 space-y-4 border-t border-[#eef4ff] pt-4">
           {/* Frequency */}
           <div>
             <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">

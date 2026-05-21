@@ -2,8 +2,8 @@
 
 export const dynamic = "force-dynamic";
 
-import { useState, useEffect, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, useCallback, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Plus, Trash2, Share2, Tag, Settings } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { Room, Household } from "@/lib/database.types";
@@ -13,8 +13,15 @@ import HouseholdModal from "@/components/HouseholdModal";
 import AddRoomModal from "@/components/AddRoomModal";
 import AppLogo from "@/components/AppLogo";
 
-export default function HomePage() {
+// Inner component: uses useSearchParams which requires a Suspense boundary.
+function HomePageContent() {
   const router = useRouter();
+  // `ts` is a cache-busting timestamp set by the room page when navigating back.
+  // Every unique value causes the data-fetch useEffect to re-run, guaranteeing
+  // a fresh rooms list even though Next.js App Router keeps this component alive.
+  const searchParams = useSearchParams();
+  const refreshKey = searchParams.get("ts") ?? "";
+
   const [household, setHousehold] = useState<Household | null>(null);
   const [rooms, setRooms] = useState<Room[]>([]);
   const [loading, setLoading] = useState(true);
@@ -24,24 +31,7 @@ export default function HomePage() {
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [showCode, setShowCode] = useState(false);
 
-  const loadHousehold = useCallback(async (id: string) => {
-    const { data, error } = await supabase
-      .from("clean_home_households")
-      .select()
-      .eq("id", id)
-      .single();
-    if (error) logError("HomePage.loadHousehold", error);
-    if (data) {
-      setHousehold(data);
-      loadRooms(data.id);
-    } else {
-      localStorage.removeItem(HOUSEHOLD_CODE_KEY);
-      setShowHouseholdModal(true);
-      setLoading(false);
-    }
-  }, []);
-
-  const loadRooms = async (householdId: string) => {
+  const loadRooms = useCallback(async (householdId: string) => {
     const { data, error } = await supabase
       .from("clean_home_rooms")
       .select()
@@ -51,8 +41,33 @@ export default function HomePage() {
     if (error) logError("HomePage.loadRooms", error);
     setRooms(data || []);
     setLoading(false);
-  };
+  }, []);
 
+  const loadHousehold = useCallback(
+    async (id: string) => {
+      const { data, error } = await supabase
+        .from("clean_home_households")
+        .select()
+        .eq("id", id)
+        .single();
+      if (error) logError("HomePage.loadHousehold", error);
+      if (data) {
+        setHousehold(data);
+        loadRooms(data.id);
+      } else {
+        localStorage.removeItem(HOUSEHOLD_CODE_KEY);
+        setShowHouseholdModal(true);
+        setLoading(false);
+      }
+    },
+    [loadRooms]
+  );
+
+  // Primary data fetch.
+  // Re-runs on mount AND whenever `refreshKey` changes.
+  // `refreshKey` is set by the room page each time it navigates back to home
+  // via router.push('/?ts=<timestamp>'), giving a unique URL each trip so
+  // Next.js treats it as a new navigation and this effect actually fires.
   useEffect(() => {
     const savedId = localStorage.getItem(HOUSEHOLD_CODE_KEY);
     if (savedId) {
@@ -61,20 +76,17 @@ export default function HomePage() {
       setShowHouseholdModal(true);
       setLoading(false);
     }
-  }, [loadHousehold]);
+  }, [loadHousehold, refreshKey]);
 
-  // Re-fetch rooms when the user navigates back to this page.
-  // Next.js App Router caches client components and doesn't re-mount them on
-  // back-navigation, so useEffect above won't re-run. Listening for the
-  // window's 'focus' event is the reliable cross-browser way to detect
-  // when the user returns to this tab / navigates back from the room page.
+  // Secondary guard: handle the browser's hardware back/forward buttons.
+  // router.push() does NOT trigger popstate, so this covers that case.
   useEffect(() => {
-    const handleFocus = () => {
+    const handlePopState = () => {
       const savedId = localStorage.getItem(HOUSEHOLD_CODE_KEY);
       if (savedId) loadHousehold(savedId);
     };
-    window.addEventListener("focus", handleFocus);
-    return () => window.removeEventListener("focus", handleFocus);
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
   }, [loadHousehold]);
 
   async function deleteRoom(id: string) {
@@ -283,5 +295,20 @@ export default function HomePage() {
         />
       )}
     </>
+  );
+}
+
+// Suspense wrapper required by Next.js because HomePageContent uses useSearchParams.
+export default function HomePage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex-1 flex items-center justify-center">
+          <div className="w-10 h-10 border-3 border-[#2B7FFF] border-t-transparent rounded-full animate-spin" />
+        </div>
+      }
+    >
+      <HomePageContent />
+    </Suspense>
   );
 }

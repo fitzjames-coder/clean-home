@@ -4,7 +4,7 @@ export const dynamic = "force-dynamic";
 
 import { useState, useEffect, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, Tag } from "lucide-react";
+import { ArrowLeft, Tag, Save } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { Room, Tool, SupplyTag, RoomSupply } from "@/lib/database.types";
 import { ROOM_ICONS, TOOL_ORDER, HOUSEHOLD_CODE_KEY } from "@/lib/constants";
@@ -86,16 +86,32 @@ export default function RoomDetailPage() {
     loadData();
   }, [loadData]);
 
+  // Returns true if the remarks textarea contains unsaved changes.
+  const remarksAreDirty = room !== null && remarks !== (room.remarks ?? "");
+
   async function saveRemarks() {
-    if (!room || remarks === room.remarks) return;
+    if (!room || !remarksAreDirty) return;
     setSavingRemarks(true);
     const { error } = await supabase
       .from("clean_home_rooms")
       .update({ remarks })
       .eq("id", id);
     if (error) logError("RoomDetailPage.saveRemarks", error);
-    setRoom((prev) => prev ? { ...prev, remarks } : prev);
+    // Update local room state so the dirty check resets to false
+    setRoom((prev) => (prev ? { ...prev, remarks } : prev));
     setSavingRemarks(false);
+  }
+
+  // Navigate back to the home screen.
+  // Uses router.push('/?ts=<timestamp>') instead of router.back() so the home
+  // page always gets a new URL, causing its useSearchParams-based useEffect to
+  // re-run and fetch a fresh rooms list from Supabase.
+  async function handleBack() {
+    // Auto-save unsaved remarks before leaving so nothing is lost.
+    if (remarksAreDirty) {
+      await saveRemarks();
+    }
+    router.push(`/?ts=${Date.now()}`);
   }
 
   function updateTool(toolId: string, partial: Partial<Tool>) {
@@ -134,7 +150,7 @@ export default function RoomDetailPage() {
       {/* Header */}
       <div className="px-5 pt-12 pb-5">
         <button
-          onClick={() => router.back()}
+          onClick={handleBack}
           className="flex items-center gap-2 text-[#2B7FFF] font-semibold mb-5 hover:opacity-80 transition-opacity"
         >
           <ArrowLeft size={18} />
@@ -195,7 +211,7 @@ export default function RoomDetailPage() {
                     )}
                     {ls.supply_tag.name_en}
                     {ls.supply_tag.name_de && (
-                      <span className="text-blue-400">/ {ls.supply_tag.name_de}</span>
+                      <span className="text-[#2B7FFF]/60">/ {ls.supply_tag.name_de}</span>
                     )}
                   </div>
                 ))}
@@ -206,9 +222,22 @@ export default function RoomDetailPage() {
 
         {/* Remarks */}
         <section>
-          <h2 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">
-            Remarks
-          </h2>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-xs font-bold text-gray-400 uppercase tracking-wider">
+              Remarks
+            </h2>
+            {/* Save button — appears only when there are unsaved changes */}
+            {remarksAreDirty && (
+              <button
+                onClick={saveRemarks}
+                disabled={savingRemarks}
+                className="flex items-center gap-1.5 text-xs font-semibold text-white bg-[#2B7FFF] px-3 py-1.5 rounded-xl hover:bg-[#1A6FEF] active:scale-95 transition-all disabled:opacity-60"
+              >
+                <Save size={12} />
+                {savingRemarks ? "Saving…" : "Save"}
+              </button>
+            )}
+          </div>
           <div className="card p-4">
             <textarea
               className="w-full text-sm text-gray-700 bg-transparent resize-none focus:outline-none placeholder-gray-300"
@@ -216,12 +245,11 @@ export default function RoomDetailPage() {
               placeholder="Add notes about this room…"
               value={remarks}
               onChange={(e) => setRemarks(e.target.value)}
-              onBlur={saveRemarks}
             />
-            {savingRemarks && (
-              <p className="text-xs text-gray-300 mt-1">Saving…</p>
-            )}
           </div>
+          {savingRemarks && (
+            <p className="text-xs text-gray-400 mt-1.5 px-1">Saving remarks…</p>
+          )}
         </section>
       </div>
     </div>

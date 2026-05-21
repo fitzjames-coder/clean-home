@@ -63,6 +63,20 @@ export default function HomePage() {
     }
   }, [loadHousehold]);
 
+  // Re-fetch rooms when the user navigates back to this page.
+  // Next.js App Router caches client components and doesn't re-mount them on
+  // back-navigation, so useEffect above won't re-run. Listening for the
+  // window's 'focus' event is the reliable cross-browser way to detect
+  // when the user returns to this tab / navigates back from the room page.
+  useEffect(() => {
+    const handleFocus = () => {
+      const savedId = localStorage.getItem(HOUSEHOLD_CODE_KEY);
+      if (savedId) loadHousehold(savedId);
+    };
+    window.addEventListener("focus", handleFocus);
+    return () => window.removeEventListener("focus", handleFocus);
+  }, [loadHousehold]);
+
   async function deleteRoom(id: string) {
     setDeletingId(id);
     const { error } = await supabase.from("clean_home_rooms").delete().eq("id", id);

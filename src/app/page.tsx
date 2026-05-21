@@ -2,8 +2,8 @@
 
 export const dynamic = "force-dynamic";
 
-import { useState, useEffect, useCallback, Suspense } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Plus, Trash2, Share2, Tag, Settings } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { Room, Household } from "@/lib/database.types";
@@ -13,15 +13,8 @@ import HouseholdModal from "@/components/HouseholdModal";
 import AddRoomModal from "@/components/AddRoomModal";
 import AppLogo from "@/components/AppLogo";
 
-// Inner component: uses useSearchParams which requires a Suspense boundary.
-function HomePageContent() {
+export default function HomePage() {
   const router = useRouter();
-  // `ts` is a cache-busting timestamp set by the room page when navigating back.
-  // Every unique value causes the data-fetch useEffect to re-run, guaranteeing
-  // a fresh rooms list even though Next.js App Router keeps this component alive.
-  const searchParams = useSearchParams();
-  const refreshKey = searchParams.get("ts") ?? "";
-
   const [household, setHousehold] = useState<Household | null>(null);
   const [rooms, setRooms] = useState<Room[]>([]);
   const [loading, setLoading] = useState(true);
@@ -31,63 +24,64 @@ function HomePageContent() {
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [showCode, setShowCode] = useState(false);
 
-  const loadRooms = useCallback(async (householdId: string) => {
-    const { data, error } = await supabase
-      .from("clean_home_rooms")
-      .select()
-      .eq("household_id", householdId)
-      .order("sort_order", { ascending: true })
-      .order("created_at", { ascending: true });
-    if (error) logError("HomePage.loadRooms", error);
-    setRooms(data || []);
-    setLoading(false);
-  }, []);
+  // ─── Data loading ──────────────────────────────────────────────────────────
+  // One plain useEffect with empty deps. This runs on every fresh mount of the
+  // home page. The room page calls router.refresh() before navigating here,
+  // which clears Next.js's client-side router cache so the component always
+  // re-mounts and this effect always fires — no event listeners needed.
+  useEffect(() => {
+    let active = true; // prevent state updates if component unmounts mid-fetch
 
-  const loadHousehold = useCallback(
-    async (id: string) => {
-      const { data, error } = await supabase
+    async function loadData() {
+      const savedId = localStorage.getItem(HOUSEHOLD_CODE_KEY);
+
+      if (!savedId) {
+        setShowHouseholdModal(true);
+        setLoading(false);
+        return;
+      }
+
+      // Fetch household
+      const { data: hh, error: hhErr } = await supabase
         .from("clean_home_households")
         .select()
-        .eq("id", id)
+        .eq("id", savedId)
         .single();
-      if (error) logError("HomePage.loadHousehold", error);
-      if (data) {
-        setHousehold(data);
-        loadRooms(data.id);
-      } else {
+
+      if (!active) return;
+
+      if (hhErr || !hh) {
+        logError("HomePage — fetch household", hhErr);
         localStorage.removeItem(HOUSEHOLD_CODE_KEY);
         setShowHouseholdModal(true);
         setLoading(false);
+        return;
       }
-    },
-    [loadRooms]
-  );
 
-  // Primary data fetch.
-  // Re-runs on mount AND whenever `refreshKey` changes.
-  // `refreshKey` is set by the room page each time it navigates back to home
-  // via router.push('/?ts=<timestamp>'), giving a unique URL each trip so
-  // Next.js treats it as a new navigation and this effect actually fires.
-  useEffect(() => {
-    const savedId = localStorage.getItem(HOUSEHOLD_CODE_KEY);
-    if (savedId) {
-      loadHousehold(savedId);
-    } else {
-      setShowHouseholdModal(true);
+      setHousehold(hh);
+
+      // Fetch rooms for this household
+      const { data: roomData, error: roomErr } = await supabase
+        .from("clean_home_rooms")
+        .select()
+        .eq("household_id", hh.id)
+        .order("sort_order", { ascending: true })
+        .order("created_at", { ascending: true });
+
+      if (!active) return;
+      if (roomErr) logError("HomePage — fetch rooms", roomErr);
+      setRooms(roomData ?? []);
       setLoading(false);
     }
-  }, [loadHousehold, refreshKey]);
 
-  // Secondary guard: handle the browser's hardware back/forward buttons.
-  // router.push() does NOT trigger popstate, so this covers that case.
-  useEffect(() => {
-    const handlePopState = () => {
-      const savedId = localStorage.getItem(HOUSEHOLD_CODE_KEY);
-      if (savedId) loadHousehold(savedId);
+    loadData();
+
+    return () => {
+      active = false;
     };
-    window.addEventListener("popstate", handlePopState);
-    return () => window.removeEventListener("popstate", handlePopState);
-  }, [loadHousehold]);
+  }, []); // empty deps — just run on mount
+
+  // ─── Actions ───────────────────────────────────────────────────────────────
 
   async function deleteRoom(id: string) {
     setDeletingId(id);
@@ -98,16 +92,18 @@ function HomePageContent() {
     setConfirmDeleteId(null);
   }
 
-  function getRoomIcon(icon: string) {
-    return ROOM_ICONS.find((i) => i.value === icon)?.emoji || "🏠";
-  }
-
   function switchHousehold() {
     localStorage.removeItem(HOUSEHOLD_CODE_KEY);
     setHousehold(null);
     setRooms([]);
     setShowHouseholdModal(true);
   }
+
+  function getRoomIcon(icon: string) {
+    return ROOM_ICONS.find((i) => i.value === icon)?.emoji ?? "🏠";
+  }
+
+  // ─── Loading state ─────────────────────────────────────────────────────────
 
   if (loading) {
     return (
@@ -116,6 +112,8 @@ function HomePageContent() {
       </div>
     );
   }
+
+  // ─── Render ────────────────────────────────────────────────────────────────
 
   return (
     <>
@@ -130,7 +128,7 @@ function HomePageContent() {
               </div>
               {household && (
                 <button
-                  onClick={() => setShowCode(!showCode)}
+                  onClick={() => setShowCode((v) => !v)}
                   className="mt-1 flex items-center gap-1.5 text-sm text-[#2B7FFF] font-medium"
                 >
                   <Share2 size={14} />
@@ -138,6 +136,7 @@ function HomePageContent() {
                 </button>
               )}
             </div>
+
             {household && (
               <button
                 onClick={switchHousehold}
@@ -149,7 +148,7 @@ function HomePageContent() {
             )}
           </div>
 
-          {/* Household code reveal */}
+          {/* Share-code panel */}
           {showCode && household && (
             <div className="mt-3 bg-[#2B7FFF]/10 border border-[#2B7FFF]/20 rounded-2xl px-4 py-3 flex items-center justify-between">
               <div>
@@ -184,20 +183,14 @@ function HomePageContent() {
           ) : (
             <div className="space-y-3">
               {rooms.map((room) => (
-                <div
-                  key={room.id}
-                  className="card group relative overflow-hidden"
-                >
+                <div key={room.id} className="card group relative overflow-hidden">
                   <button
                     onClick={() => router.push(`/room/${room.id}`)}
                     className="flex items-center gap-4 p-4 w-full text-left hover:bg-[#F0F6FF]/60 transition-colors"
                   >
-                    {/* Icon */}
                     <div className="w-14 h-14 flex-shrink-0 rounded-2xl bg-gradient-to-br from-[#EBF4FF] to-[#E3FBF3] flex items-center justify-center text-3xl shadow-inner">
                       {getRoomIcon(room.icon)}
                     </div>
-
-                    {/* Info */}
                     <div className="flex-1 min-w-0">
                       <p className="font-bold text-gray-900 text-base">{room.name}</p>
                       {room.remarks ? (
@@ -206,14 +199,10 @@ function HomePageContent() {
                         <p className="text-sm text-gray-300 mt-0.5 italic">No remarks</p>
                       )}
                     </div>
-
-                    {/* Arrow */}
-                    <div className="text-gray-300 group-hover:text-[#2B7FFF] transition-colors text-lg">
-                      ›
-                    </div>
+                    <div className="text-gray-300 group-hover:text-[#2B7FFF] transition-colors text-lg">›</div>
                   </button>
 
-                  {/* Delete */}
+                  {/* Inline delete */}
                   <div className="absolute right-4 top-4 flex items-center gap-1">
                     {confirmDeleteId === room.id ? (
                       <>
@@ -233,10 +222,7 @@ function HomePageContent() {
                       </>
                     ) : (
                       <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setConfirmDeleteId(room.id);
-                        }}
+                        onClick={(e) => { e.stopPropagation(); setConfirmDeleteId(room.id); }}
                         className="opacity-0 group-hover:opacity-100 p-1.5 rounded-lg hover:bg-red-50 transition-all"
                       >
                         <Trash2 size={15} className="text-gray-300 hover:text-red-400" />
@@ -250,7 +236,7 @@ function HomePageContent() {
         </div>
       </div>
 
-      {/* Bottom FAB bar */}
+      {/* FAB bar */}
       {household && (
         <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md px-5 pb-8 pt-3 bg-gradient-to-t from-[#F8FAFF] to-transparent pointer-events-none">
           <div className="flex gap-3 pointer-events-auto">
@@ -276,10 +262,17 @@ function HomePageContent() {
       {showHouseholdModal && (
         <HouseholdModal
           onClose={() => setShowHouseholdModal(false)}
-          onSuccess={(h) => {
-            setHousehold(h);
+          onSuccess={(hh) => {
+            setHousehold(hh);
             setShowHouseholdModal(false);
-            loadRooms(h.id);
+            // Fetch the rooms for the newly joined/created household
+            supabase
+              .from("clean_home_rooms")
+              .select()
+              .eq("household_id", hh.id)
+              .order("sort_order", { ascending: true })
+              .order("created_at", { ascending: true })
+              .then(({ data }) => setRooms(data ?? []));
           }}
         />
       )}
@@ -295,20 +288,5 @@ function HomePageContent() {
         />
       )}
     </>
-  );
-}
-
-// Suspense wrapper required by Next.js because HomePageContent uses useSearchParams.
-export default function HomePage() {
-  return (
-    <Suspense
-      fallback={
-        <div className="flex-1 flex items-center justify-center">
-          <div className="w-10 h-10 border-3 border-[#2B7FFF] border-t-transparent rounded-full animate-spin" />
-        </div>
-      }
-    >
-      <HomePageContent />
-    </Suspense>
   );
 }

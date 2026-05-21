@@ -4,7 +4,7 @@ import { useState } from "react";
 import { X } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { Room, RoomIcon } from "@/lib/database.types";
-import { TOOL_ORDER } from "@/lib/constants";
+import { TOOL_ORDER, TOOL_META } from "@/lib/constants";
 import { extractErrorMessage, logError } from "@/lib/errors";
 import RoomIconPicker from "./RoomIconPicker";
 
@@ -39,10 +39,12 @@ export default function AddRoomModal({ householdId, onClose, onSuccess }: AddRoo
         throw roomErr;
       }
 
-      // Create default tools (all active)
+      // Create default tools (all active) — tool_name must be supplied explicitly
+      // because the column has no server-side default and is required in the DB.
       const toolRows = TOOL_ORDER.map((tool_type) => ({
         room_id: room.id,
         tool_type,
+        tool_name: TOOL_META[tool_type].label, // "Duster" | "Broom" | "Mop" | "Vacuum" | "Bot"
         is_active: true,
         frequency: "W",
         instructions: "",

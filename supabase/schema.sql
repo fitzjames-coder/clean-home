@@ -25,6 +25,8 @@ CREATE TABLE IF NOT EXISTS clean_home_tools (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   room_id UUID NOT NULL REFERENCES clean_home_rooms(id) ON DELETE CASCADE,
   tool_type TEXT NOT NULL CHECK (tool_type IN ('duster', 'broom', 'mop', 'vacuum', 'bot')),
+  -- Human-readable display name: "Duster", "Broom", "Mop", "Vacuum", "Bot"
+  tool_name TEXT NOT NULL,
   is_active BOOLEAN DEFAULT TRUE,
   last_completed TIMESTAMPTZ,
   frequency TEXT NOT NULL DEFAULT 'W' CHECK (frequency IN ('D', 'W', '2W', '2+W')),
@@ -32,6 +34,25 @@ CREATE TABLE IF NOT EXISTS clean_home_tools (
   created_at TIMESTAMPTZ DEFAULT NOW(),
   UNIQUE(room_id, tool_type)
 );
+
+-- Migration: add tool_name to existing tables (safe to run on a live DB)
+-- The UPDATE backfills any rows that predate this column.
+ALTER TABLE clean_home_tools
+  ADD COLUMN IF NOT EXISTS tool_name TEXT;
+
+UPDATE clean_home_tools
+SET tool_name = CASE tool_type
+  WHEN 'duster'  THEN 'Duster'
+  WHEN 'broom'   THEN 'Broom'
+  WHEN 'mop'     THEN 'Mop'
+  WHEN 'vacuum'  THEN 'Vacuum'
+  WHEN 'bot'     THEN 'Bot'
+END
+WHERE tool_name IS NULL;
+
+-- Make the column NOT NULL once backfill is complete
+ALTER TABLE clean_home_tools
+  ALTER COLUMN tool_name SET NOT NULL;
 
 -- Supply tags table
 CREATE TABLE IF NOT EXISTS clean_home_supply_tags (

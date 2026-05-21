@@ -33,6 +33,8 @@ export interface Tool {
   id: string;
   room_id: string;
   tool_type: ToolType;
+  /** Human-readable name stored in the DB: "Duster" | "Broom" | "Mop" | "Vacuum" | "Bot" */
+  tool_name: string;
   is_active: boolean;
   last_completed: string | null;
   frequency: Frequency;

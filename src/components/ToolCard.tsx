@@ -111,7 +111,7 @@ export default function ToolCard({
   }
 
   return (
-    <div className={`card overflow-hidden transition-all ${due ? "border-amber-100" : "border-[#2ECC8F]/15"}`}>
+    <div className={`card overflow-hidden transition-all ${due ? "border-[#2B7FFF]/15" : "border-[#2ECC8F]/15"}`}>
       {/* Main row */}
       <div className="flex items-center gap-3 p-4">
         {/* Mark Done button */}
@@ -120,7 +120,7 @@ export default function ToolCard({
           disabled={markingDone}
           className={`w-12 h-12 flex-shrink-0 rounded-2xl flex items-center justify-center text-2xl transition-all active:scale-90 ${
             due
-              ? "bg-amber-50 hover:bg-amber-100 border border-amber-200"
+              ? "bg-[#E0EEFF] hover:bg-[#d0e8ff] border border-[#2B7FFF]/25"
               : "bg-[#e0f9f0] hover:bg-[#d0f5e8] border border-[#2ECC8F]/25"
           }`}
           title="Mark as cleaned"
@@ -134,14 +134,14 @@ export default function ToolCard({
             <p className="font-semibold text-gray-900 text-sm">{meta.label}</p>
             <span
               className={`text-xs font-medium px-2 py-0.5 rounded-full ${
-                due ? "bg-amber-100 text-amber-700" : "bg-[#d0f5e8] text-[#1aaa72]"
+                due ? "bg-[#E0EEFF] text-[#2B7FFF]" : "bg-[#d0f5e8] text-[#1aaa72]"
               }`}
             >
               {FREQUENCY_META[tool.frequency].shortLabel}
             </span>
           </div>
           <p
-            className={`text-xs mt-0.5 ${due ? "text-amber-600" : "text-[#2ECC8F]"}`}
+            className={`text-xs mt-0.5 ${due ? "text-gray-400" : "text-[#2ECC8F]"}`}
             title={lastFull}
           >
             {lastLabel}

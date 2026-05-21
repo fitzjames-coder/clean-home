@@ -141,7 +141,7 @@ export default function SuppliesPage() {
             <button
               type="button"
               onClick={() => fileRef.current?.click()}
-              className="w-16 h-16 rounded-2xl border-2 border-dashed border-gray-200 hover:border-[#2B7FFF] flex items-center justify-center bg-gray-50 overflow-hidden transition-colors relative flex-shrink-0"
+              className="w-16 h-16 rounded-2xl border-2 border-dashed border-[#D4E2F0] hover:border-[#2B7FFF] flex items-center justify-center bg-[#F8FAFF] overflow-hidden transition-colors relative flex-shrink-0"
             >
               {newPhotoUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element

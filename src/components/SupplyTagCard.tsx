@@ -77,7 +77,7 @@ export default function SupplyTagCard({ supply, onDelete, onUpdate }: SupplyTagC
           <button
             type="button"
             onClick={() => fileRef.current?.click()}
-            className="w-14 h-14 rounded-2xl border-2 border-dashed border-gray-200 hover:border-[#2B7FFF] flex items-center justify-center bg-gray-50 overflow-hidden transition-colors relative"
+            className="w-14 h-14 rounded-2xl border-2 border-dashed border-[#D4E2F0] hover:border-[#2B7FFF] flex items-center justify-center bg-[#F8FAFF] overflow-hidden transition-colors relative"
           >
             {photoUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
@@ -140,7 +140,7 @@ export default function SupplyTagCard({ supply, onDelete, onUpdate }: SupplyTagC
   return (
     <div className="card p-4 flex items-center gap-3">
       {/* Photo */}
-      <div className="w-12 h-12 rounded-2xl bg-gray-100 flex items-center justify-center overflow-hidden flex-shrink-0">
+      <div className="w-12 h-12 rounded-2xl bg-[#EBF4FF] flex items-center justify-center overflow-hidden flex-shrink-0">
         {supply.photo_url ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={supply.photo_url} alt={supply.name_en} className="w-full h-full object-cover" />
@@ -161,7 +161,7 @@ export default function SupplyTagCard({ supply, onDelete, onUpdate }: SupplyTagC
       <div className="flex items-center gap-1">
         <button
           onClick={() => setEditing(true)}
-          className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+          className="p-2 rounded-full hover:bg-[#F0F6FF] transition-colors"
         >
           <Pencil size={16} className="text-gray-400" />
         </button>
@@ -175,7 +175,7 @@ export default function SupplyTagCard({ supply, onDelete, onUpdate }: SupplyTagC
             </button>
             <button
               onClick={() => setConfirmDelete(false)}
-              className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+              className="p-2 rounded-full hover:bg-[#F0F6FF] transition-colors"
             >
               <X size={16} className="text-gray-400" />
             </button>

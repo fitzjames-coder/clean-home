@@ -21,7 +21,7 @@ export default function FrequencySelector({ value, onChange }: FrequencySelector
           className={`flex-1 py-2 rounded-xl text-xs font-semibold transition-all ${
             value === f
               ? "bg-[#2B7FFF] text-white shadow-sm"
-              : "bg-[#eef4ff] text-[#5a7ab8] hover:bg-[#e3f0ff]"
+              : "bg-[#F0F6FF] text-[#4A6FA5] hover:bg-[#E0EEFF]"
           }`}
           title={FREQUENCY_META[f].description}
         >

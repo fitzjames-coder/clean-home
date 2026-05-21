@@ -119,13 +119,13 @@ export default function HouseholdModal({ onClose, onSuccess }: HouseholdModalPro
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-bold text-gray-900">Welcome to Clean Home</h2>
-          <button onClick={onClose} className="p-2 rounded-full hover:bg-gray-100 transition-colors">
+          <button onClick={onClose} className="p-2 rounded-full hover:bg-[#F0F6FF] transition-colors">
             <X size={20} className="text-gray-500" />
           </button>
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-2 mb-6 bg-[#eef4ff] p-1 rounded-2xl">
+        <div className="flex gap-2 mb-6 bg-[#F0F6FF] p-1 rounded-2xl">
           <button
             onClick={() => { setTab("create"); setError(""); }}
             className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition-all ${

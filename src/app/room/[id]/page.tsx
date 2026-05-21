@@ -142,7 +142,7 @@ export default function RoomDetailPage() {
         </button>
 
         <div className="flex items-center gap-4">
-          <div className="w-16 h-16 rounded-3xl bg-gradient-to-br from-[#ddeeff] to-[#d5f7ec] flex items-center justify-center text-4xl shadow-inner">
+          <div className="w-16 h-16 rounded-3xl bg-gradient-to-br from-[#EBF4FF] to-[#E3FBF3] flex items-center justify-center text-4xl shadow-inner">
             {roomMeta?.emoji || "🏠"}
           </div>
           <div>

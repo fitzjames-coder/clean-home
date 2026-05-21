@@ -103,7 +103,7 @@ export default function ToolCard({
             <p className="text-xs text-gray-400">Inactive</p>
           </div>
         </div>
-        <button onClick={toggleActive} className="p-2 rounded-full hover:bg-[#eef4ff] transition-colors">
+        <button onClick={toggleActive} className="p-2 rounded-full hover:bg-[#F0F6FF] transition-colors">
           <ToggleLeft size={22} className="text-gray-400" />
         </button>
       </div>
@@ -150,12 +150,12 @@ export default function ToolCard({
 
         {/* Controls */}
         <div className="flex items-center gap-1">
-          <button onClick={toggleActive} title="Disable tool" className="p-2 rounded-full hover:bg-[#eef4ff] transition-colors">
+          <button onClick={toggleActive} title="Disable tool" className="p-2 rounded-full hover:bg-[#F0F6FF] transition-colors">
             <ToggleRight size={20} className="text-[#2B7FFF]" />
           </button>
           <button
             onClick={() => setExpanded(!expanded)}
-            className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+            className="p-2 rounded-full hover:bg-[#F0F6FF] transition-colors"
           >
             {expanded ? (
               <ChevronUp size={18} className="text-gray-400" />
@@ -176,7 +176,7 @@ export default function ToolCard({
 
       {/* Expanded section */}
       {expanded && (
-        <div className="px-4 pb-5 space-y-4 border-t border-[#eef4ff] pt-4">
+        <div className="px-4 pb-5 space-y-4 border-t border-[#E8EFF8] pt-4">
           {/* Frequency */}
           <div>
             <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
@@ -221,7 +221,7 @@ export default function ToolCard({
                       className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${
                         isLinked
                           ? "bg-[#2B7FFF] text-white border-[#2B7FFF]"
-                          : "bg-white text-gray-600 border-gray-200 hover:border-[#2B7FFF] hover:text-[#2B7FFF]"
+                          : "bg-white text-[#4A6FA5] border-[#D4E2F0] hover:border-[#2B7FFF] hover:text-[#2B7FFF]"
                       }`}
                     >
                       {supply.photo_url && (

@@ -18,8 +18,8 @@ export default function RoomIconPicker({ value, onChange }: RoomIconPickerProps)
           onClick={() => onChange(icon.value)}
           className={`flex flex-col items-center gap-1 p-2 rounded-2xl border-2 transition-all ${
             value === icon.value
-              ? "border-[#2B7FFF] bg-[#e3f0ff]"
-              : "border-[#e8eef6] bg-white hover:border-[#2B7FFF]/40"
+              ? "border-[#2B7FFF] bg-[#E0EEFF]"
+              : "border-[#E8EFF8] bg-white hover:border-[#2B7FFF]/50"
           }`}
           title={icon.label}
         >

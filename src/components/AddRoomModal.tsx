@@ -69,7 +69,7 @@ export default function AddRoomModal({ householdId, onClose, onSuccess }: AddRoo
       <div className="w-full max-w-md bg-white rounded-t-3xl shadow-2xl p-6 pb-10 animate-in slide-in-from-bottom max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between mb-5">
           <h2 className="text-xl font-bold text-gray-900">Add Room</h2>
-          <button onClick={onClose} className="p-2 rounded-full hover:bg-gray-100 transition-colors">
+          <button onClick={onClose} className="p-2 rounded-full hover:bg-[#F0F6FF] transition-colors">
             <X size={20} className="text-gray-500" />
           </button>
         </div>

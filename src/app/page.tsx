@@ -4,7 +4,6 @@ export const dynamic = "force-dynamic";
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import { Plus, Trash2, Share2, Tag, Settings } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { Room, Household } from "@/lib/database.types";
@@ -12,6 +11,7 @@ import { ROOM_ICONS, HOUSEHOLD_CODE_KEY } from "@/lib/constants";
 import { logError } from "@/lib/errors";
 import HouseholdModal from "@/components/HouseholdModal";
 import AddRoomModal from "@/components/AddRoomModal";
+import AppLogo from "@/components/AppLogo";
 
 export default function HomePage() {
   const router = useRouter();
@@ -99,17 +99,7 @@ export default function HomePage() {
           <div className="flex items-start justify-between">
             <div>
               <div className="flex items-center gap-3">
-                <Image
-                  src="/icon.png"
-                  alt="Clean Home"
-                  width={44}
-                  height={44}
-                  className="rounded-xl flex-shrink-0"
-                  onError={(e) => {
-                    // Fall back to SVG if PNG not yet placed
-                    (e.target as HTMLImageElement).src = "/icon.svg";
-                  }}
-                />
+                <AppLogo size={44} />
                 <h1 className="text-3xl font-bold text-gray-900">Clean Home</h1>
               </div>
               {household && (
@@ -125,7 +115,7 @@ export default function HomePage() {
             {household && (
               <button
                 onClick={switchHousehold}
-                className="p-2.5 rounded-2xl bg-white border border-gray-100 shadow-sm hover:bg-gray-50 transition-colors"
+                className="p-2.5 rounded-2xl bg-white border border-[#E8EFF8] shadow-sm hover:bg-[#F0F6FF] transition-colors"
                 title="Switch household"
               >
                 <Settings size={18} className="text-gray-500" />
@@ -174,10 +164,10 @@ export default function HomePage() {
                 >
                   <button
                     onClick={() => router.push(`/room/${room.id}`)}
-                    className="flex items-center gap-4 p-4 w-full text-left hover:bg-gray-50/50 transition-colors"
+                    className="flex items-center gap-4 p-4 w-full text-left hover:bg-[#F0F6FF]/60 transition-colors"
                   >
                     {/* Icon */}
-                    <div className="w-14 h-14 flex-shrink-0 rounded-2xl bg-gradient-to-br from-[#ddeeff] to-[#d5f7ec] flex items-center justify-center text-3xl shadow-inner">
+                    <div className="w-14 h-14 flex-shrink-0 rounded-2xl bg-gradient-to-br from-[#EBF4FF] to-[#E3FBF3] flex items-center justify-center text-3xl shadow-inner">
                       {getRoomIcon(room.icon)}
                     </div>
 
@@ -210,7 +200,7 @@ export default function HomePage() {
                         </button>
                         <button
                           onClick={() => setConfirmDeleteId(null)}
-                          className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded-lg"
+                          className="text-xs px-2 py-1 bg-[#F0F6FF] text-[#4A6FA5] rounded-lg"
                         >
                           Cancel
                         </button>
@@ -236,18 +226,18 @@ export default function HomePage() {
 
       {/* Bottom FAB bar */}
       {household && (
-        <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md px-5 pb-8 pt-3 bg-gradient-to-t from-[#f5f9ff] to-transparent pointer-events-none">
+        <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md px-5 pb-8 pt-3 bg-gradient-to-t from-[#F8FAFF] to-transparent pointer-events-none">
           <div className="flex gap-3 pointer-events-auto">
             <button
               onClick={() => router.push("/supplies")}
-              className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-white border border-gray-200 shadow-sm text-sm font-semibold text-gray-600 hover:bg-gray-50 transition-colors"
+              className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-white border border-[#2B7FFF]/25 shadow-sm text-sm font-semibold text-[#2B7FFF] hover:bg-[#F0F6FF] transition-colors"
             >
               <Tag size={16} className="text-[#2ECC8F]" />
               Supplies
             </button>
             <button
               onClick={() => setShowAddRoom(true)}
-              className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl bg-[#2B7FFF] shadow-lg text-white font-bold text-sm hover:bg-blue-600 active:scale-95 transition-all"
+              className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl bg-[#2B7FFF] shadow-lg text-white font-bold text-sm hover:bg-[#1A6FEF] active:scale-95 transition-all"
             >
               <Plus size={18} />
               Add Room

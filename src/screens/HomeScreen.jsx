@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useApp } from '../context/AppContext.jsx';
-import { ROOM_ICONS } from '../lib/constants.js';
+import { ROOM_ICONS, roomStatus } from '../lib/constants.js';
 import { supabase } from '../lib/supabase.js';
 import AddRoomModal from '../components/AddRoomModal.jsx';
 
@@ -70,8 +70,11 @@ export default function HomeScreen() {
             <div className="empty-state-text">Add your first room to start tracking cleaning tasks.</div>
           </div>
         ) : (
-          rooms.map(room => (
-            <div key={room.id} className="room-card">
+          rooms.map(room => {
+            const status = roomStatus(room.tools ?? []);
+            const statusClass = status === 'ok' ? '' : ` room-card-${status}`;
+            return (
+            <div key={room.id} className={`room-card${statusClass}`}>
               <button className="room-card-btn" onClick={() => goToRoom(room.id)}>
                 <div className="room-icon-wrap">{getRoomEmoji(room.icon)}</div>
                 <div className="room-info">
@@ -108,7 +111,8 @@ export default function HomeScreen() {
                 )}
               </div>
             </div>
-          ))
+            );
+          })
         )}
       </div>
 

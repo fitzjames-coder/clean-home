@@ -409,6 +409,20 @@ img { display: block; max-width: 100%; }
   position: relative;
 }
 
+/* ── Overdue status badges (left border accent) ────────────────────────────── */
+/* amber when any active tool is overdue; red when any is critically overdue   */
+.room-card-overdue {
+  border-color: #F59E0B;
+  border-left: 5px solid #F59E0B;
+  background: linear-gradient(to right, #FFFBEB 0%, var(--surface) 48px);
+}
+
+.room-card-critical {
+  border-color: #EF4444;
+  border-left: 5px solid #EF4444;
+  background: linear-gradient(to right, #FEF2F2 0%, var(--surface) 48px);
+}
+
 .room-card-btn {
   display: flex;
   align-items: center;

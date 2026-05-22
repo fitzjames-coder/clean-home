@@ -56,3 +56,44 @@ export function formatLastCleanedFull(dateStr) {
   if (!dateStr) return 'Never cleaned';
   return new Date(dateStr).toLocaleString();
 }
+
+// ── Room-card status helpers ──────────────────────────────────────────────────
+
+const THRESHOLDS = { D: 1, W: 7, '2W': 14, '2+W': 21 };
+const CRITICAL_GRACE = 2.5; // days past threshold before escalating to critical
+
+/**
+ * Returns 'ok' | 'overdue' | 'critical' for a single tool.
+ *
+ * - ok       : not yet past the frequency threshold
+ * - overdue  : past threshold, but less than (threshold + 2.5) days overdue
+ * - critical : at or beyond (threshold + 2.5) days overdue
+ *
+ * Never-cleaned tools (lastCompleted is null) return 'overdue'. We don't
+ * escalate them to critical because we don't have created_at here.
+ */
+export function toolStatus(lastCompleted, frequency) {
+  const threshold = THRESHOLDS[frequency] ?? 7;
+  if (!lastCompleted) return 'overdue';
+  const diffDays = (Date.now() - new Date(lastCompleted).getTime()) / 86400000;
+  if (diffDays < threshold)                    return 'ok';
+  if (diffDays < threshold + CRITICAL_GRACE)   return 'overdue';
+  return 'critical';
+}
+
+/**
+ * Returns the worst status across all active tools in a room.
+ * 'critical' > 'overdue' > 'ok'. Returns 'ok' when there are no active tools.
+ *
+ * @param {Array<{is_active: boolean, last_completed: string|null, frequency: string}>} tools
+ */
+export function roomStatus(tools) {
+  let worst = 'ok';
+  for (const tool of tools) {
+    if (!tool.is_active) continue;
+    const s = toolStatus(tool.last_completed, tool.frequency);
+    if (s === 'critical') return 'critical';   // can't get worse — short-circuit
+    if (s === 'overdue')  worst = 'overdue';
+  }
+  return worst;
+}

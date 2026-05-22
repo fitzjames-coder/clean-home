@@ -83,17 +83,44 @@ export function toolStatus(lastCompleted, frequency) {
 
 /**
  * Returns the worst status across all active tools in a room.
- * 'critical' > 'overdue' > 'ok'. Returns 'ok' when there are no active tools.
+ *
+ * New majority rule (replaces the old single-tool 2.5-day critical threshold):
+ *   - 'ok'       = zero active tools are overdue
+ *   - 'overdue'  = ≥1 active tool overdue, but fewer than half are overdue
+ *   - 'critical' = half or more active tools are overdue
+ *                  (Math.ceil so 3 active tools → 2+ overdue = critical)
+ *
+ * toolStatus() is unchanged — ToolCard per-tool styling is unaffected.
  *
  * @param {Array<{is_active: boolean, last_completed: string|null, frequency: string}>} tools
  */
 export function roomStatus(tools) {
-  let worst = 'ok';
-  for (const tool of tools) {
-    if (!tool.is_active) continue;
-    const s = toolStatus(tool.last_completed, tool.frequency);
-    if (s === 'critical') return 'critical';   // can't get worse — short-circuit
-    if (s === 'overdue')  worst = 'overdue';
-  }
-  return worst;
+  const active = tools.filter(t => t.is_active);
+  if (active.length === 0) return 'ok';
+
+  const overdueCount = active.filter(
+    t => toolStatus(t.last_completed, t.frequency) !== 'ok'
+  ).length;
+
+  if (overdueCount === 0)                              return 'ok';
+  if (overdueCount >= Math.ceil(active.length / 2))   return 'critical';
+  return 'overdue';
+}
+
+/**
+ * Returns active overdue/critical tools sorted by TOOL_ORDER.
+ * Each entry is { tool_type, frequency } — enough to render "Duster: W".
+ * Returns [] when all tools are on track.
+ *
+ * Requires tools rows to include `tool_type` (fetched from clean_home_tools).
+ *
+ * @param {Array<{tool_type: string, is_active: boolean, last_completed: string|null, frequency: string}>} tools
+ * @returns {Array<{tool_type: string, frequency: string}>}
+ */
+export function overdueToolsForRoom(tools) {
+  return tools
+    .filter(t => t.is_active && toolStatus(t.last_completed, t.frequency) !== 'ok')
+    .sort((a, b) => TOOL_ORDER.indexOf(a.tool_type) - TOOL_ORDER.indexOf(b.tool_type))
+    .slice(0, 5)
+    .map(t => ({ tool_type: t.tool_type, frequency: t.frequency }));
 }

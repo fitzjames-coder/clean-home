@@ -1,24 +1,29 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useApp } from '../context/AppContext.jsx';
 import { supabase } from '../lib/supabase.js';
-import {
-  ROOM_ICONS, TOOL_ORDER,
-} from '../lib/constants.js';
+import { ROOM_ICONS, TOOL_ORDER } from '../lib/constants.js';
 import ToolCard from '../components/ToolCard.jsx';
+import SupplyDetailModal from '../components/SupplyDetailModal.jsx';
 
 export default function RoomDetailScreen({ roomId }) {
   const { goHome, supplies: householdSupplies } = useApp();
 
-  const [room,          setRoom]          = useState(null);
-  const [tools,         setTools]         = useState([]);
-  const [linkedSupplies,setLinkedSupplies] = useState([]);
-  const [remarks,       setRemarks]       = useState('');
-  const [savingRemarks, setSavingRemarks] = useState(false);
-  const [loading,       setLoading]       = useState(true);
+  const [room,            setRoom]            = useState(null);
+  const [tools,           setTools]           = useState([]);
+  const [linkedSupplies,  setLinkedSupplies]  = useState([]);
+  const [remarks,         setRemarks]         = useState('');
+  const [savingRemarks,   setSavingRemarks]   = useState(false);
+  const [loading,         setLoading]         = useState(true);
 
-  // ── Load room data on mount (and whenever roomId changes) ──────────────────
-  // Since screens are conditionally rendered, this component mounts fresh
-  // every time we navigate to it — no stale state possible.
+  // ── Supply-picker + detail modal state ────────────────────────────────────
+  const [showSupplyPicker, setShowSupplyPicker] = useState(false);
+  const [detailSupply,     setDetailSupply]     = useState(null); // supply object | null
+
+  // ── Mark-all-done state ───────────────────────────────────────────────────
+  const [confirmMarkAll, setConfirmMarkAll] = useState(false);
+  const [markingAll,     setMarkingAll]     = useState(false);
+
+  // ── Load data on mount ────────────────────────────────────────────────────
   const loadLinkedSupplies = useCallback(async () => {
     if (!roomId) return;
     const { data, error } = await supabase
@@ -78,8 +83,7 @@ export default function RoomDetailScreen({ roomId }) {
   }
 
   // ── Back navigation ────────────────────────────────────────────────────────
-  // goHome() re-fetches rooms before showing HomeScreen, so the list is always
-  // fresh. No router tricks, cache-busting, or event listeners needed.
+
   async function handleBack() {
     if (remarksAreDirty) await saveRemarks();
     goHome();
@@ -89,8 +93,42 @@ export default function RoomDetailScreen({ roomId }) {
 
   function updateTool(toolId, partial) {
     setTools(prev => prev.map(t => t.id === toolId ? { ...t, ...partial } : t));
-    if ('supply_tag_id' in partial || Object.keys(partial).length === 0) {
-      loadLinkedSupplies();
+  }
+
+  // ── Mark all active tools done (except bot) ────────────────────────────────
+
+  async function markAllDone() {
+    setMarkingAll(true);
+    const now = new Date().toISOString();
+    const toMark = tools.filter(t => t.is_active && t.tool_type !== 'bot');
+    await Promise.all(
+      toMark.map(t =>
+        supabase.from('clean_home_tools').update({ last_completed: now }).eq('id', t.id)
+      )
+    );
+    setTools(prev =>
+      prev.map(t => (t.is_active && t.tool_type !== 'bot') ? { ...t, last_completed: now } : t)
+    );
+    setConfirmMarkAll(false);
+    setMarkingAll(false);
+  }
+
+  // ── Supply picker ──────────────────────────────────────────────────────────
+
+  async function toggleLinkedSupply(supplyTagId, isLinked) {
+    if (isLinked) {
+      const row = linkedSupplies.find(ls => ls.supply_tag_id === supplyTagId);
+      if (row) {
+        await supabase.from('clean_home_room_supplies').delete().eq('id', row.id);
+        setLinkedSupplies(prev => prev.filter(ls => ls.id !== row.id));
+      }
+    } else {
+      const { data, error } = await supabase
+        .from('clean_home_room_supplies')
+        .insert({ room_id: roomId, supply_tag_id: supplyTagId })
+        .select('*, supply_tag:clean_home_supply_tags(*)')
+        .single();
+      if (!error && data) setLinkedSupplies(prev => [...prev, data]);
     }
   }
 
@@ -125,12 +163,47 @@ export default function RoomDetailScreen({ roomId }) {
         </button>
 
         <div className="room-detail-hero">
-          <div className="room-hero-icon">{roomMeta?.emoji ?? '🏠'}</div>
+          {/* Tappable icon → mark all done */}
+          <button
+            className="room-hero-icon-btn"
+            onClick={() => setConfirmMarkAll(true)}
+            title="Mark all tools as done"
+          >
+            <div className="room-hero-icon">{roomMeta?.emoji ?? '🏠'}</div>
+          </button>
           <div>
             <div className="room-detail-name">{room.name}</div>
             <div className="room-detail-type">{roomMeta?.label ?? 'Room'}</div>
           </div>
         </div>
+
+        {/* Mark-all confirmation panel */}
+        {confirmMarkAll && (
+          <div className="room-mark-all-confirm">
+            <p className="room-mark-all-text">
+              Mark all active tools as cleaned?{' '}
+              <span style={{ color: 'var(--text-muted)' }}>Cleaning Bot will be skipped.</span>
+            </p>
+            <div className="room-mark-all-actions">
+              <button
+                className="btn btn-ghost"
+                style={{ padding: '8px 16px', fontSize: '13px' }}
+                onClick={() => setConfirmMarkAll(false)}
+                disabled={markingAll}
+              >
+                Cancel
+              </button>
+              <button
+                className="btn btn-teal"
+                style={{ padding: '8px 16px', fontSize: '13px' }}
+                onClick={markAllDone}
+                disabled={markingAll}
+              >
+                {markingAll ? 'Saving…' : '✓ Mark All Done'}
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* ── Scrollable content ── */}
@@ -144,40 +217,53 @@ export default function RoomDetailScreen({ roomId }) {
               <ToolCard
                 key={tool.id}
                 tool={tool}
-                availableSupplies={householdSupplies}
-                linkedSupplies={linkedSupplies.filter(ls => ls.room_id === roomId)}
-                roomId={roomId}
                 onUpdate={partial => updateTool(tool.id, partial)}
               />
             ))}
           </div>
         </section>
 
-        {/* Linked supplies summary */}
-        {linkedSupplies.length > 0 && (
-          <section>
-            <div className="section-label">🏷️ Room Supplies</div>
-            <div className="card" style={{ padding: '14px' }}>
-              <div className="linked-supply-chips">
-                {linkedSupplies.map(ls => (
-                  <div key={ls.id} className="linked-chip">
-                    {ls.supply_tag.photo_url && (
-                      <img
-                        src={ls.supply_tag.photo_url}
-                        alt=""
-                        className="supply-chip-photo"
-                      />
-                    )}
-                    {ls.supply_tag.name_en}
-                    {ls.supply_tag.name_de && (
-                      <span className="linked-chip-de">/ {ls.supply_tag.name_de}</span>
-                    )}
-                  </div>
-                ))}
-              </div>
+        {/* Room-level Supply Tags */}
+        <section>
+          <div className="room-supplies-header">
+            <div className="section-label" style={{ marginBottom: 0 }}>Supply Tags</div>
+            <button
+              className="room-supplies-add-btn"
+              onClick={() => setShowSupplyPicker(true)}
+              title="Add / remove supplies"
+            >
+              ＋
+            </button>
+          </div>
+
+          {linkedSupplies.length === 0 ? (
+            <div className="room-supplies-empty">
+              No supplies linked — tap ＋ to add some.
             </div>
-          </section>
-        )}
+          ) : (
+            <div className="room-supply-chips">
+              {linkedSupplies.map(ls => (
+                <button
+                  key={ls.id}
+                  className="room-supply-chip"
+                  onClick={() => setDetailSupply(ls.supply_tag)}
+                >
+                  {ls.supply_tag.photo_url && (
+                    <img
+                      src={ls.supply_tag.photo_url}
+                      alt=""
+                      className="room-supply-chip-photo"
+                    />
+                  )}
+                  <span>{ls.supply_tag.name_en}</span>
+                  {ls.supply_tag.name_de && (
+                    <span className="linked-chip-de">/ {ls.supply_tag.name_de}</span>
+                  )}
+                </button>
+              ))}
+            </div>
+          )}
+        </section>
 
         {/* Remarks */}
         <section>
@@ -208,6 +294,64 @@ export default function RoomDetailScreen({ roomId }) {
           )}
         </section>
       </div>
+
+      {/* ── Supply picker modal ── */}
+      {showSupplyPicker && (
+        <div
+          className="modal-overlay"
+          onClick={e => e.target === e.currentTarget && setShowSupplyPicker(false)}
+        >
+          <div className="modal-sheet">
+            <div className="modal-header">
+              <h2 className="modal-title">Supply Tags</h2>
+              <button className="modal-close" onClick={() => setShowSupplyPicker(false)}>✕</button>
+            </div>
+
+            {householdSupplies.length === 0 ? (
+              <p className="text-hint">
+                No supplies yet — go to Supplies to add some.
+              </p>
+            ) : (
+              <div className="supply-picker-list">
+                {householdSupplies.map(supply => {
+                  const linked = linkedSupplies.some(ls => ls.supply_tag_id === supply.id);
+                  return (
+                    <button
+                      key={supply.id}
+                      className={`supply-picker-row${linked ? ' linked' : ''}`}
+                      onClick={() => toggleLinkedSupply(supply.id, linked)}
+                    >
+                      <div className="supply-picker-check">{linked ? '✓' : ''}</div>
+                      {supply.photo_url && (
+                        <img
+                          src={supply.photo_url}
+                          alt=""
+                          className="supply-picker-photo"
+                        />
+                      )}
+                      <div className="supply-picker-names">
+                        <div className="supply-picker-name-en">{supply.name_en}</div>
+                        {supply.name_de && (
+                          <div className="supply-picker-name-de">{supply.name_de}</div>
+                        )}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ── Supply detail modal (tap on a chip) ── */}
+      {detailSupply && (
+        <SupplyDetailModal
+          supply={detailSupply}
+          onClose={() => setDetailSupply(null)}
+          onEdit={() => setDetailSupply(null)}
+        />
+      )}
     </div>
   );
 }

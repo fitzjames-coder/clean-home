@@ -3,22 +3,16 @@ import { supabase } from '../lib/supabase.js';
 import { TOOL_META, FREQUENCY_META, isDue, formatLastCleaned, formatLastCleanedFull } from '../lib/constants.js';
 import FrequencySelector from './FrequencySelector.jsx';
 
-export default function ToolCard({
-  tool,
-  availableSupplies,
-  linkedSupplies,
-  roomId,
-  onUpdate,
-}) {
+export default function ToolCard({ tool, onUpdate }) {
   const [expanded,       setExpanded]       = useState(false);
   const [instructions,   setInstructions]   = useState(tool.instructions ?? '');
   const [savingInstr,    setSavingInstr]    = useState(false);
   const [markingDone,    setMarkingDone]    = useState(false);
   const [togglingActive, setTogglingActive] = useState(false);
 
-  const meta  = TOOL_META[tool.tool_type];
-  const due   = isDue(tool.last_completed, tool.frequency);
-  const last  = formatLastCleaned(tool.last_completed);
+  const meta     = TOOL_META[tool.tool_type];
+  const due      = isDue(tool.last_completed, tool.frequency);
+  const last     = formatLastCleaned(tool.last_completed);
   const lastFull = formatLastCleanedFull(tool.last_completed);
 
   // ── Actions ──────────────────────────────────────────────────────────────
@@ -60,16 +54,6 @@ export default function ToolCard({
     await supabase.from('clean_home_tools').update({ instructions }).eq('id', tool.id);
     onUpdate({ instructions });
     setSavingInstr(false);
-  }
-
-  async function toggleSupply(supplyTagId, isLinked) {
-    if (isLinked) {
-      const row = linkedSupplies.find(s => s.supply_tag_id === supplyTagId);
-      if (row) await supabase.from('clean_home_room_supplies').delete().eq('id', row.id);
-    } else {
-      await supabase.from('clean_home_room_supplies').insert({ room_id: roomId, supply_tag_id: supplyTagId });
-    }
-    onUpdate({}); // signal parent to refresh linked supplies
   }
 
   // ── Inactive state ────────────────────────────────────────────────────────
@@ -170,33 +154,6 @@ export default function ToolCard({
             />
             {savingInstr && <div className="text-hint mt-1">Saving…</div>}
           </div>
-
-          {/* Supply tags */}
-          {availableSupplies.length > 0 && (
-            <div>
-              <div className="section-label">🏷️ Supplies</div>
-              <div className="supply-chips">
-                {availableSupplies.map(supply => {
-                  const isLinked = linkedSupplies.some(ls => ls.supply_tag_id === supply.id);
-                  return (
-                    <button
-                      key={supply.id}
-                      className={`supply-chip${isLinked ? ' linked' : ''}`}
-                      onClick={() => toggleSupply(supply.id, isLinked)}
-                    >
-                      {supply.photo_url && (
-                        <img src={supply.photo_url} alt="" className="supply-chip-photo" />
-                      )}
-                      {supply.name_en}
-                      {supply.name_de && (
-                        <span style={{ opacity: 0.65 }}>/ {supply.name_de}</span>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          )}
         </div>
       )}
     </div>

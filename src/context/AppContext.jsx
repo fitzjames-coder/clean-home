@@ -62,7 +62,7 @@ export function AppProvider({ children }) {
       const roomIds = rooms.map(r => r.id);
       const { data: toolData, error: toolErr } = await supabase
         .from('clean_home_tools')
-        .select('id, room_id, is_active, last_completed, frequency')
+        .select('id, room_id, tool_type, is_active, last_completed, frequency')
         .in('room_id', roomIds);
 
       if (toolErr) {

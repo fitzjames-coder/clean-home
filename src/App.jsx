@@ -1,11 +1,11 @@
 import { AppProvider, useApp } from './context/AppContext.jsx';
-import HomeScreen      from './screens/HomeScreen.jsx';
+import HomeScreen       from './screens/HomeScreen.jsx';
 import RoomDetailScreen from './screens/RoomDetailScreen.jsx';
-import SuppliesScreen  from './screens/SuppliesScreen.jsx';
-import HouseholdModal  from './components/HouseholdModal.jsx';
+import SuppliesScreen   from './screens/SuppliesScreen.jsx';
+import RoomCodeScreen   from './components/RoomCodeScreen.jsx';
 
 function AppContent() {
-  const { screen, selectedRoomId, onHouseholdSet } = useApp();
+  const { screen, selectedRoomId, onCodeSet } = useApp();
 
   if (screen === 'loading') {
     return (
@@ -15,10 +15,10 @@ function AppContent() {
     );
   }
 
-  if (screen === 'household') {
+  if (screen === 'setup') {
     return (
       <div className="app-shell">
-        <HouseholdModal onSuccess={onHouseholdSet} />
+        <RoomCodeScreen onSuccess={onCodeSet} />
       </div>
     );
   }

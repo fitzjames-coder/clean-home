@@ -1,86 +1,68 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
-import { HOUSEHOLD_CODE_KEY } from '../lib/constants';
+import { ROOM_CODE_KEY } from '../lib/constants';
 
 const AppContext = createContext(null);
 
 // ─────────────────────────────────────────────────────────────────────────────
 // AppProvider
 //
-// State-based navigation: no URL router, no browser history, no caching layer.
-// "currentScreen" is just a React state variable. Switching screens is a
-// function call. Re-fetching data before showing a screen is trivial — just
-// await the fetch, then set the screen. This eliminates every navigation/
-// caching bug that plagued the Next.js version.
+// Simple room-code scoping — no household table, no FK lookups, no joins.
+// Every row in clean_home_rooms and clean_home_supply_tags carries a plain
+// `room_code` text column. The code is stored in localStorage and used as
+// the filter for every SELECT/INSERT. This matches the Pantry app pattern.
+//
+// Screens: 'loading' | 'setup' | 'home' | 'room' | 'supplies'
 // ─────────────────────────────────────────────────────────────────────────────
 
 export function AppProvider({ children }) {
-  // Screens: 'loading' | 'household' | 'home' | 'room' | 'supplies'
-  const [screen, setScreen]               = useState('loading');
+  const [screen,         setScreen]         = useState('loading');
   const [selectedRoomId, setSelectedRoomId] = useState(null);
-  const [household, setHousehold]         = useState(null);
-  const [rooms, setRooms]                 = useState([]);
-  const [supplies, setSupplies]           = useState([]);
+  const [roomCode,       setRoomCode]       = useState(null);
+  const [rooms,          setRooms]          = useState([]);
+  const [supplies,       setSupplies]       = useState([]);
 
   // ── Bootstrap ──────────────────────────────────────────────────────────────
   useEffect(() => {
-    const savedId = localStorage.getItem(HOUSEHOLD_CODE_KEY);
-    if (savedId) {
-      initHousehold(savedId);
+    const saved = localStorage.getItem(ROOM_CODE_KEY);
+    if (saved) {
+      setRoomCode(saved);
+      Promise.all([fetchRooms(saved), fetchSupplies(saved)]).then(() => {
+        setScreen('home');
+      });
     } else {
-      setScreen('household');
+      setScreen('setup');
     }
-  }, []); // runs once on app start
-
-  async function initHousehold(id) {
-    const { data, error } = await supabase
-      .from('clean_home_households')
-      .select()
-      .eq('id', id)
-      .single();
-
-    if (error || !data) {
-      console.error('[CleanHome] initHousehold:', error);
-      localStorage.removeItem(HOUSEHOLD_CODE_KEY);
-      setScreen('household');
-      return;
-    }
-
-    setHousehold(data);
-    await Promise.all([fetchRooms(data.id), fetchSupplies(data.id)]);
-    setScreen('home');
-  }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Data fetchers ──────────────────────────────────────────────────────────
 
-  async function fetchRooms(householdId) {
-    const id = householdId ?? household?.id;
-    if (!id) return;
+  async function fetchRooms(code) {
+    const c = code ?? roomCode;
+    if (!c) return;
     const { data, error } = await supabase
       .from('clean_home_rooms')
       .select()
-      .eq('household_id', id)
+      .eq('room_code', c)
       .order('sort_order', { ascending: true })
       .order('created_at',  { ascending: true });
     if (error) console.error('[CleanHome] fetchRooms:', error);
     setRooms(data ?? []);
   }
 
-  async function fetchSupplies(householdId) {
-    const id = householdId ?? household?.id;
-    if (!id) return;
+  async function fetchSupplies(code) {
+    const c = code ?? roomCode;
+    if (!c) return;
     const { data, error } = await supabase
       .from('clean_home_supply_tags')
       .select()
-      .eq('household_id', id)
+      .eq('room_code', c)
       .order('name_en');
     if (error) console.error('[CleanHome] fetchSupplies:', error);
     setSupplies(data ?? []);
   }
 
   // ── Navigation ─────────────────────────────────────────────────────────────
-  // Each navigation function fetches fresh data FIRST, then switches the
-  // screen. There is no cache to bust — state is always authoritative.
 
   async function goHome() {
     await fetchRooms(); // always refresh before showing the list
@@ -98,37 +80,38 @@ export function AppProvider({ children }) {
     setScreen('supplies');
   }
 
-  // Called by HouseholdModal after a successful create or join
-  function onHouseholdSet(hh) {
-    localStorage.setItem(HOUSEHOLD_CODE_KEY, hh.id);
-    setHousehold(hh);
-    // Kick off background loads then show home
-    Promise.all([fetchRooms(hh.id), fetchSupplies(hh.id)]).then(() => {
+  // Called by RoomCodeScreen when the user enters their code
+  function onCodeSet(code) {
+    const normalized = code.trim().toUpperCase();
+    localStorage.setItem(ROOM_CODE_KEY, normalized);
+    setRoomCode(normalized);
+    Promise.all([fetchRooms(normalized), fetchSupplies(normalized)]).then(() => {
       setScreen('home');
     });
   }
 
-  function switchHousehold() {
-    localStorage.removeItem(HOUSEHOLD_CODE_KEY);
-    setHousehold(null);
+  // Clear the saved code and return to setup screen
+  function changeCode() {
+    localStorage.removeItem(ROOM_CODE_KEY);
+    setRoomCode(null);
     setRooms([]);
     setSupplies([]);
-    setScreen('household');
+    setScreen('setup');
   }
 
   // ── Context value ──────────────────────────────────────────────────────────
   const value = {
     screen,
     selectedRoomId,
-    household,
+    roomCode,
     rooms,
     supplies,
     // navigation
     goHome,
     goToRoom,
     goToSupplies,
-    onHouseholdSet,
-    switchHousehold,
+    onCodeSet,
+    changeCode,
     // data refresh (used by screens after mutations)
     fetchRooms,
     fetchSupplies,

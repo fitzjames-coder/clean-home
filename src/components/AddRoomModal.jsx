@@ -3,7 +3,7 @@ import { supabase } from '../lib/supabase.js';
 import { TOOL_ORDER, TOOL_META } from '../lib/constants.js';
 import RoomIconPicker from './RoomIconPicker.jsx';
 
-export default function AddRoomModal({ householdId, onClose, onSuccess }) {
+export default function AddRoomModal({ roomCode, onClose, onSuccess }) {
   const [name,    setName]    = useState('');
   const [icon,    setIcon]    = useState('living-room');
   const [loading, setLoading] = useState(false);
@@ -12,10 +12,9 @@ export default function AddRoomModal({ householdId, onClose, onSuccess }) {
   async function handleSubmit() {
     if (!name.trim()) { setError('Please enter a room name'); return; }
 
-    // Guard: household ID must be present before attempting any insert
-    if (!householdId) {
-      const msg = 'No household ID – cannot create room. Try reloading the app.';
-      console.error('[CleanHome] AddRoomModal: householdId is missing!', { householdId });
+    if (!roomCode) {
+      const msg = 'No room code – cannot create room. Try reloading the app.';
+      console.error('[CleanHome] AddRoomModal: roomCode is missing!', { roomCode });
       setError(msg);
       return;
     }
@@ -25,7 +24,7 @@ export default function AddRoomModal({ householdId, onClose, onSuccess }) {
 
     try {
       // ── Step 1: Insert room ─────────────────────────────────────────────
-      const roomPayload = { household_id: householdId, name: name.trim(), icon };
+      const roomPayload = { room_code: roomCode, name: name.trim(), icon };
       console.log('[CleanHome] AddRoomModal: inserting room…', roomPayload);
 
       const { data: room, error: roomErr } = await supabase
@@ -39,7 +38,6 @@ export default function AddRoomModal({ householdId, onClose, onSuccess }) {
         throw roomErr;
       }
       if (!room) {
-        // This happens when RLS blocks the insert but returns no explicit error
         const msg = 'Room insert returned no data. Check Supabase Row Level Security policies — inserts may be blocked.';
         console.error('[CleanHome] AddRoomModal:', msg);
         throw new Error(msg);
@@ -51,7 +49,7 @@ export default function AddRoomModal({ householdId, onClose, onSuccess }) {
       const toolRows = TOOL_ORDER.map(tool_type => ({
         room_id:      room.id,
         tool_type,
-        tool_name:    TOOL_META[tool_type].label,   // "Duster" | "Broom" | "Mop" | "Vacuum" | "Bot"
+        tool_name:    TOOL_META[tool_type].label,   // 'Duster' | 'Broom' | 'Mop' | 'Vacuum' | 'Bot'
         is_active:    true,
         frequency:    'W',
         instructions: '',
@@ -65,7 +63,6 @@ export default function AddRoomModal({ householdId, onClose, onSuccess }) {
         .select();
 
       if (toolErr) {
-        // Tool insert failure is non-fatal for the room, but must be loud
         console.error('[CleanHome] AddRoomModal: tool insert error →', toolErr);
         throw toolErr;
       }

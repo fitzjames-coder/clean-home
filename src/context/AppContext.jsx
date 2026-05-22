@@ -53,7 +53,33 @@ export function AppProvider({ children }) {
       alert(`[CleanHome] Failed to load rooms: ${error.message}\n\nCheck the browser console for details.`);
       return;
     }
-    setRooms(data ?? []);
+
+    const rooms = data ?? [];
+
+    // Attach tools to each room so the home screen can compute overdue status
+    // without a per-room round-trip. One extra query for all rooms at once.
+    if (rooms.length > 0) {
+      const roomIds = rooms.map(r => r.id);
+      const { data: toolData, error: toolErr } = await supabase
+        .from('clean_home_tools')
+        .select('id, room_id, is_active, last_completed, frequency')
+        .in('room_id', roomIds);
+
+      if (toolErr) {
+        console.error('[CleanHome] fetchRooms (tools):', toolErr);
+        // Non-fatal: badges simply won't show. Rooms still load.
+      } else {
+        const toolsByRoom = {};
+        for (const tool of toolData ?? []) {
+          (toolsByRoom[tool.room_id] ??= []).push(tool);
+        }
+        for (const room of rooms) {
+          room.tools = toolsByRoom[room.id] ?? [];
+        }
+      }
+    }
+
+    setRooms(rooms);
   }
 
   async function fetchSupplies(code) {

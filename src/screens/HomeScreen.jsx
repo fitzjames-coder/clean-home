@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useApp } from '../context/AppContext.jsx';
-import { ROOM_ICONS, roomStatus } from '../lib/constants.js';
+import { ROOM_ICONS, TOOL_META, roomStatus, overdueToolsForRoom } from '../lib/constants.js';
 import { supabase } from '../lib/supabase.js';
 import AddRoomModal from '../components/AddRoomModal.jsx';
 
@@ -79,10 +79,20 @@ export default function HomeScreen() {
                 <div className="room-icon-wrap">{getRoomEmoji(room.icon)}</div>
                 <div className="room-info">
                   <div className="room-name">{room.name}</div>
-                  {room.remarks
-                    ? <div className="room-remarks">{room.remarks}</div>
-                    : <div className="room-remarks-placeholder">No remarks</div>
-                  }
+                  {room.remarks ? (
+                    <div className="room-remarks">{room.remarks}</div>
+                  ) : (() => {
+                    const overdue = overdueToolsForRoom(room.tools ?? []);
+                    return overdue.length > 0
+                      ? <div className="room-overdue-tools">
+                          {overdue.map(t => (
+                            <div key={t.tool_type} className="room-overdue-line">
+                              {TOOL_META[t.tool_type].label}: {t.frequency}
+                            </div>
+                          ))}
+                        </div>
+                      : null;
+                  })()}
                 </div>
                 <div className="room-chevron">›</div>
               </button>

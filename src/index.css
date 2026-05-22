@@ -450,6 +450,15 @@ img { display: block; max-width: 100%; }
 .room-name  { font-weight: 700; font-size: 15px; color: var(--text); }
 .room-remarks { font-size: 13px; color: var(--text-muted); margin-top: 2px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 .room-remarks-placeholder { font-size: 13px; color: var(--text-light); margin-top: 2px; font-style: italic; }
+
+/* Overdue tool list shown when room has no remark and ≥1 tool is past due */
+.room-overdue-tools { margin-top: 3px; }
+.room-overdue-line {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.45;
+  font-variant-numeric: tabular-nums;
+}
 .room-chevron { font-size: 20px; color: var(--text-light); transition: color 0.12s; }
 .room-card-btn:hover .room-chevron { color: var(--blue); }
 

@@ -97,3 +97,19 @@ export function roomStatus(tools) {
   }
   return worst;
 }
+
+/**
+ * Returns the active overdue/critical tools for a room, sorted by TOOL_ORDER.
+ * Each entry is { tool_type, frequency } — enough to render "Duster: W".
+ * Returns an empty array when all tools are on track.
+ *
+ * @param {Array<{tool_type: string, is_active: boolean, last_completed: string|null, frequency: string}>} tools
+ * @returns {Array<{tool_type: string, frequency: string}>}
+ */
+export function overdueToolsForRoom(tools) {
+  return tools
+    .filter(t => t.is_active && toolStatus(t.last_completed, t.frequency) !== 'ok')
+    .sort((a, b) => TOOL_ORDER.indexOf(a.tool_type) - TOOL_ORDER.indexOf(b.tool_type))
+    .slice(0, 5)
+    .map(t => ({ tool_type: t.tool_type, frequency: t.frequency }));
+}

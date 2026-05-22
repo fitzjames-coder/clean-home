@@ -1,10 +1,13 @@
 import { useState, useRef } from 'react';
 import { supabase } from '../lib/supabase.js';
+import SupplyDetailModal from './SupplyDetailModal.jsx';
 
 export default function SupplyTagCard({ supply, onDelete, onUpdate }) {
   const [editing,       setEditing]       = useState(false);
+  const [showDetail,    setShowDetail]    = useState(false);
   const [nameEn,        setNameEn]        = useState(supply.name_en);
   const [nameDe,        setNameDe]        = useState(supply.name_de ?? '');
+  const [instructions,  setInstructions]  = useState(supply.instructions ?? '');
   const [photoUrl,      setPhotoUrl]      = useState(supply.photo_url ?? '');
   const [uploading,     setUploading]     = useState(false);
   const [saving,        setSaving]        = useState(false);
@@ -34,7 +37,12 @@ export default function SupplyTagCard({ supply, onDelete, onUpdate }) {
     setSaving(true);
     const { data, error } = await supabase
       .from('clean_home_supply_tags')
-      .update({ name_en: nameEn.trim(), name_de: nameDe.trim() || null, photo_url: photoUrl || null })
+      .update({
+        name_en:      nameEn.trim(),
+        name_de:      nameDe.trim() || null,
+        photo_url:    photoUrl || null,
+        instructions: instructions.trim() || null,
+      })
       .eq('id', supply.id)
       .select()
       .single();
@@ -55,6 +63,7 @@ export default function SupplyTagCard({ supply, onDelete, onUpdate }) {
     setNameEn(supply.name_en);
     setNameDe(supply.name_de ?? '');
     setPhotoUrl(supply.photo_url ?? '');
+    setInstructions(supply.instructions ?? '');
   }
 
   // ── Edit mode ─────────────────────────────────────────────────────────────
@@ -103,6 +112,16 @@ export default function SupplyTagCard({ supply, onDelete, onUpdate }) {
           </div>
         </div>
 
+        {/* Instructions field — spans full width below the photo+names row */}
+        <textarea
+          className="textarea"
+          rows={3}
+          style={{ fontSize: '14px' }}
+          placeholder="How to use this supply…"
+          value={instructions}
+          onChange={e => setInstructions(e.target.value)}
+        />
+
         <div className="supply-edit-actions">
           <button
             className="btn btn-ghost"
@@ -126,55 +145,74 @@ export default function SupplyTagCard({ supply, onDelete, onUpdate }) {
 
   // ── Display mode ──────────────────────────────────────────────────────────
   return (
-    <div className="supply-card">
-      <div className="supply-photo-wrap">
-        {supply.photo_url
-          ? <img src={supply.photo_url} alt={supply.name_en} className="supply-photo" />
-          : <span>🧴</span>
-        }
-      </div>
-
-      <div className="supply-names">
-        <div className="supply-name-en">{supply.name_en}</div>
-        {supply.name_de && <div className="supply-name-de">{supply.name_de}</div>}
-      </div>
-
-      <div className="supply-actions">
+    <>
+      <div className="supply-card">
+        {/* Tappable region: photo + names → opens detail modal */}
         <button
-          className="btn-icon"
-          onClick={() => setEditing(true)}
-          title="Edit"
+          type="button"
+          className="supply-card-tap-region"
+          onClick={() => setShowDetail(true)}
+          aria-label={`View details for ${supply.name_en}`}
         >
-          ✏️
+          <div className="supply-photo-wrap">
+            {supply.photo_url
+              ? <img src={supply.photo_url} alt={supply.name_en} className="supply-photo" />
+              : <span>🧴</span>
+            }
+          </div>
+
+          <div className="supply-names">
+            <div className="supply-name-en">{supply.name_en}</div>
+            {supply.name_de && <div className="supply-name-de">{supply.name_de}</div>}
+          </div>
         </button>
 
-        {confirmDelete ? (
-          <div className="confirm-delete-row">
-            <button
-              className="btn btn-danger"
-              style={{ padding: '4px 10px', fontSize: '12px', borderRadius: 8 }}
-              onClick={handleDelete}
-            >
-              ✓
-            </button>
-            <button
-              className="btn btn-ghost"
-              style={{ padding: '4px 10px', fontSize: '12px', borderRadius: 8 }}
-              onClick={() => setConfirmDelete(false)}
-            >
-              ✕
-            </button>
-          </div>
-        ) : (
+        {/* Action buttons — separate from the tap region so they don't open the modal */}
+        <div className="supply-actions">
           <button
             className="btn-icon"
-            onClick={() => setConfirmDelete(true)}
-            title="Delete"
+            onClick={() => setEditing(true)}
+            title="Edit"
           >
-            🗑️
+            ✏️
           </button>
-        )}
+
+          {confirmDelete ? (
+            <div className="confirm-delete-row">
+              <button
+                className="btn btn-danger"
+                style={{ padding: '4px 10px', fontSize: '12px', borderRadius: 8 }}
+                onClick={handleDelete}
+              >
+                ✓
+              </button>
+              <button
+                className="btn btn-ghost"
+                style={{ padding: '4px 10px', fontSize: '12px', borderRadius: 8 }}
+                onClick={() => setConfirmDelete(false)}
+              >
+                ✕
+              </button>
+            </div>
+          ) : (
+            <button
+              className="btn-icon"
+              onClick={() => setConfirmDelete(true)}
+              title="Delete"
+            >
+              🗑️
+            </button>
+          )}
+        </div>
       </div>
-    </div>
+
+      {showDetail && (
+        <SupplyDetailModal
+          supply={supply}
+          onClose={() => setShowDetail(false)}
+          onEdit={() => setEditing(true)}
+        />
+      )}
+    </>
   );
 }

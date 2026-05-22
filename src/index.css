@@ -866,6 +866,23 @@ img { display: block; max-width: 100%; }
   padding: 14px;
 }
 
+/* Tappable photo+name region — opens detail modal */
+.supply-card-tap-region {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+  background: none;
+  border: none;
+  padding: 0;
+  text-align: left;
+  cursor: pointer;
+  border-radius: var(--radius);
+  transition: background 0.12s;
+}
+.supply-card-tap-region:hover { background: rgba(240, 246, 255, 0.7); }
+
 .supply-photo-wrap {
   width: 48px;
   height: 48px;
@@ -973,3 +990,146 @@ img { display: block; max-width: 100%; }
 /* ── Toggle icons (rendered as emoji-style text) ───────────────────────────── */
 .toggle-on  { color: var(--blue); font-size: 22px; line-height: 1; }
 .toggle-off { color: var(--text-muted); font-size: 22px; line-height: 1; }
+
+/* ─────────────────────────────────────────────────────────────────────────── */
+/* SUPPLY DETAIL MODAL                                                          */
+/* ─────────────────────────────────────────────────────────────────────────── */
+
+.supply-detail-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 20px;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  animation: fadeIn 0.18s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.supply-detail-modal {
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+  background: var(--surface);
+  border-radius: var(--radius-xl);
+  padding: 32px 24px 28px;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.18), 0 2px 8px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  animation: scaleIn 0.2s ease-out;
+}
+
+@keyframes scaleIn {
+  from { transform: scale(0.94); opacity: 0; }
+  to   { transform: scale(1);    opacity: 1; }
+}
+
+/* ✕ button — top-right corner */
+.supply-detail-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  color: var(--text-muted);
+  transition: background 0.12s, color 0.12s;
+}
+.supply-detail-close:hover { background: var(--blue-pale); color: var(--blue); }
+
+/* Photo */
+.supply-detail-photo-wrap {
+  width: 140px;
+  height: 140px;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(135deg, var(--blue-light), var(--teal-light));
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.supply-detail-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.supply-detail-photo-fallback {
+  font-size: 64px;
+  line-height: 1;
+}
+
+/* Names */
+.supply-detail-names {
+  text-align: center;
+}
+
+.supply-detail-name-en {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--text);
+  line-height: 1.2;
+}
+
+.supply-detail-name-de {
+  margin-top: 4px;
+  font-size: 15px;
+  color: var(--text-muted);
+}
+
+/* Instructions section */
+.supply-detail-section {
+  width: 100%;
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+}
+
+.supply-detail-instructions-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.supply-detail-instructions-text {
+  font-size: 14px;
+  color: var(--text);
+  line-height: 1.55;
+  white-space: pre-wrap;
+}
+
+.supply-detail-instructions-empty {
+  font-size: 13px;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+/* Actions row */
+.supply-detail-actions {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.supply-detail-actions .btn {
+  min-width: 120px;
+}

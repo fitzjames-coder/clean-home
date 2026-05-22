@@ -46,7 +46,13 @@ export function AppProvider({ children }) {
       .eq('room_code', c)
       .order('sort_order', { ascending: true })
       .order('created_at',  { ascending: true });
-    if (error) console.error('[CleanHome] fetchRooms:', error);
+    if (error) {
+      console.error('[CleanHome] fetchRooms:', error);
+      // Do NOT overwrite state with [] on error — leave previous data intact
+      // so a transient DB failure doesn't blank the room list.
+      alert(`[CleanHome] Failed to load rooms: ${error.message}\n\nCheck the browser console for details.`);
+      return;
+    }
     setRooms(data ?? []);
   }
 
@@ -58,7 +64,12 @@ export function AppProvider({ children }) {
       .select()
       .eq('room_code', c)
       .order('name_en');
-    if (error) console.error('[CleanHome] fetchSupplies:', error);
+    if (error) {
+      console.error('[CleanHome] fetchSupplies:', error);
+      // Do NOT overwrite state with [] on error — leave previous data intact.
+      alert(`[CleanHome] Failed to load supplies: ${error.message}\n\nCheck the browser console for details.`);
+      return;
+    }
     setSupplies(data ?? []);
   }
 

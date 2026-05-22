@@ -1133,3 +1133,172 @@ img { display: block; max-width: 100%; }
 .supply-detail-actions .btn {
   min-width: 120px;
 }
+
+/* ─────────────────────────────────────────────────────────────────────────── */
+/* HOME CARD — overdue tool list                                                */
+/* ─────────────────────────────────────────────────────────────────────────── */
+
+/* Wrapper stacks lines with minimal gap */
+.room-overdue-tools { margin-top: 3px; }
+
+/* Each "Duster: W" line — compact, muted, tabular for alignment */
+.room-overdue-line {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.45;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────── */
+/* ROOM DETAIL — tappable hero icon (mark all done)                             */
+/* ─────────────────────────────────────────────────────────────────────────── */
+
+.room-hero-icon-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+  flex-shrink: 0;
+}
+.room-hero-icon-btn:hover  { transform: scale(1.08); }
+.room-hero-icon-btn:active { transform: scale(0.95); }
+
+/* confirmation panel beneath the hero */
+.room-mark-all-confirm {
+  margin-top: 14px;
+  background: var(--teal-light);
+  border: 1.5px solid var(--teal-pale);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.room-mark-all-text    { font-size: 14px; color: var(--text); line-height: 1.4; }
+.room-mark-all-actions { display: flex; gap: 8px; justify-content: flex-end; }
+
+/* ─────────────────────────────────────────────────────────────────────────── */
+/* ROOM DETAIL — Supply Tags section                                            */
+/* ─────────────────────────────────────────────────────────────────────────── */
+
+.room-supplies-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.room-supplies-add-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--blue);
+  color: #fff;
+  font-size: 18px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  transition: background 0.12s, transform 0.1s;
+}
+.room-supplies-add-btn:hover  { background: var(--blue-hover); }
+.room-supplies-add-btn:active { transform: scale(0.92); }
+
+.room-supplies-empty {
+  font-size: 13px;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+/* Tappable supply chips in the room detail */
+.room-supply-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.room-supply-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  background: var(--blue-pale);
+  color: #4A6FA5;
+  border: 1.5px solid var(--border);
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s;
+}
+.room-supply-chip:hover {
+  background: var(--blue-muted);
+  border-color: var(--blue);
+}
+
+.room-supply-chip-photo {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  object-fit: cover;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────── */
+/* SUPPLY PICKER (bottom-sheet modal)                                           */
+/* ─────────────────────────────────────────────────────────────────────────── */
+
+.supply-picker-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.supply-picker-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  text-align: left;
+  transition: background 0.12s;
+  width: 100%;
+}
+.supply-picker-row:hover        { background: var(--blue-pale); }
+.supply-picker-row.linked       { background: var(--teal-light); }
+.supply-picker-row.linked:hover { background: var(--teal-pale); }
+
+.supply-picker-check {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  border: 2px solid var(--border-input);
+  background: var(--surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--teal);
+  flex-shrink: 0;
+  transition: border-color 0.12s, background 0.12s;
+}
+.supply-picker-row.linked .supply-picker-check {
+  border-color: var(--teal);
+  background: var(--teal);
+  color: #fff;
+}
+
+.supply-picker-photo {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-sm);
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.supply-picker-names { flex: 1; min-width: 0; }
+.supply-picker-name-en { font-size: 14px; font-weight: 600; color: var(--text); }
+.supply-picker-name-de { font-size: 12px; color: var(--text-muted); margin-top: 1px; }

@@ -28,7 +28,8 @@ export const FREQUENCY_META = {
 
 export const TOOL_ORDER = ['duster', 'broom', 'mop', 'vacuum', 'bot'];
 
-export const HOUSEHOLD_CODE_KEY = 'clean_home_household_id';
+// Key used to persist the room code in localStorage
+export const ROOM_CODE_KEY = 'clean_home_room_code';
 
 // ── Date helpers ─────────────────────────────────────────────────────────────
 
@@ -54,9 +55,4 @@ export function formatLastCleaned(dateStr) {
 export function formatLastCleanedFull(dateStr) {
   if (!dateStr) return 'Never cleaned';
   return new Date(dateStr).toLocaleString();
-}
-
-export function generateHouseholdCode() {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  return Array.from({ length: 6 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
 }

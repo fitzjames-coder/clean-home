@@ -1,11 +1,10 @@
 import { useState } from 'react';
 import { useApp } from '../context/AppContext.jsx';
 import { supabase } from '../lib/supabase.js';
-import { generateHouseholdCode, HOUSEHOLD_CODE_KEY } from '../lib/constants.js';
 import SupplyTagCard from '../components/SupplyTagCard.jsx';
 
 export default function SuppliesScreen() {
-  const { household, supplies, setSupplies, goHome } = useApp();
+  const { roomCode, supplies, setSupplies, goHome } = useApp();
 
   const [showAdd,    setShowAdd]    = useState(false);
   const [newNameEn,  setNewNameEn]  = useState('');
@@ -44,9 +43,9 @@ export default function SuppliesScreen() {
       const { data, error } = await supabase
         .from('clean_home_supply_tags')
         .insert({
-          household_id: household.id,
-          name_en: newNameEn.trim(),
-          name_de: newNameDe.trim() || null,
+          room_code: roomCode,
+          name_en:   newNameEn.trim(),
+          name_de:   newNameDe.trim() || null,
           photo_url: newPhotoUrl || null,
         })
         .select()

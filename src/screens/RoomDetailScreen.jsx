@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useApp } from '../context/AppContext.jsx';
 import { supabase } from '../lib/supabase.js';
 import {
-  ROOM_ICONS, TOOL_ORDER, HOUSEHOLD_CODE_KEY,
+  ROOM_ICONS, TOOL_ORDER,
 } from '../lib/constants.js';
 import ToolCard from '../components/ToolCard.jsx';
 

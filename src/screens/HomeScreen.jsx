@@ -6,14 +6,13 @@ import AddRoomModal from '../components/AddRoomModal.jsx';
 
 export default function HomeScreen() {
   const {
-    household, rooms, goToRoom, goToSupplies, switchHousehold, setRooms,
+    roomCode, rooms, goToRoom, goToSupplies, changeCode, setRooms,
   } = useApp();
 
-  const [showAddRoom,    setShowAddRoom]    = useState(false);
-  const [showCode,       setShowCode]       = useState(false);
-  const [confirmDeleteId,setConfirmDeleteId] = useState(null);
-  const [deletingId,     setDeletingId]     = useState(null);
-  const [logoFailed,     setLogoFailed]     = useState(false);
+  const [showAddRoom,     setShowAddRoom]     = useState(false);
+  const [confirmDeleteId, setConfirmDeleteId] = useState(null);
+  const [deletingId,      setDeletingId]      = useState(null);
+  const [logoFailed,      setLogoFailed]      = useState(false);
 
   async function deleteRoom(id) {
     setDeletingId(id);
@@ -26,11 +25,6 @@ export default function HomeScreen() {
 
   function getRoomEmoji(iconValue) {
     return ROOM_ICONS.find(i => i.value === iconValue)?.emoji ?? '🏠';
-  }
-
-  function copyCode() {
-    navigator.clipboard?.writeText(household.code);
-    setShowCode(false);
   }
 
   return (
@@ -53,35 +47,18 @@ export default function HomeScreen() {
               <h1 className="home-title">Clean Home</h1>
             </div>
 
-            {household && (
-              <button
-                className="home-household-btn"
-                onClick={() => setShowCode(v => !v)}
-              >
-                <span>🔗</span>
-                {household.name}
-              </button>
+            {roomCode && (
+              <div className="home-household-btn">
+                <span>🔑</span>
+                {roomCode}
+              </div>
             )}
           </div>
 
-          {household && (
-            <button className="settings-btn" onClick={switchHousehold} title="Switch household">
-              ⚙️
-            </button>
-          )}
+          <button className="settings-btn" onClick={changeCode} title="Change code">
+            ⚙️
+          </button>
         </div>
-
-        {showCode && household && (
-          <div className="share-code-panel">
-            <div>
-              <div className="share-code-label">Share code</div>
-              <div className="share-code-value">{household.code}</div>
-            </div>
-            <button className="btn btn-primary" style={{ padding: '8px 16px', fontSize: '13px' }} onClick={copyCode}>
-              Copy
-            </button>
-          </div>
-        )}
       </div>
 
       {/* ── Rooms list ── */}
@@ -136,25 +113,23 @@ export default function HomeScreen() {
       </div>
 
       {/* ── FAB bar ── */}
-      {household && (
-        <div className="fab-bar">
-          <div className="fab-bar-inner">
-            <button className="fab-supplies" onClick={goToSupplies}>
-              <span className="fab-supplies-icon">🏷️</span>
-              Supplies
-            </button>
-            <button className="fab-add-room" onClick={() => setShowAddRoom(true)}>
-              <span>＋</span>
-              Add Room
-            </button>
-          </div>
+      <div className="fab-bar">
+        <div className="fab-bar-inner">
+          <button className="fab-supplies" onClick={goToSupplies}>
+            <span className="fab-supplies-icon">🏷️</span>
+            Supplies
+          </button>
+          <button className="fab-add-room" onClick={() => setShowAddRoom(true)}>
+            <span>＋</span>
+            Add Room
+          </button>
         </div>
-      )}
+      </div>
 
       {/* ── Add room modal ── */}
-      {showAddRoom && household && (
+      {showAddRoom && (
         <AddRoomModal
-          householdId={household.id}
+          roomCode={roomCode}
           onClose={() => setShowAddRoom(false)}
           onSuccess={room => {
             setRooms(prev => [...prev, room]);

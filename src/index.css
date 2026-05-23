@@ -721,8 +721,55 @@ img { display: block; max-width: 100%; }
   font-size: 12px;
   margin-top: 2px;
 }
-.tool-last-cleaned.due  { color: var(--text-muted); }
-.tool-last-cleaned.done { color: var(--teal); }
+.tool-last-cleaned.due   { color: #F59E0B; }
+.tool-last-cleaned.done  { color: var(--teal); }
+.tool-last-cleaned.never { color: var(--text-muted); }
+
+/* ── Tool icon images (PNG) ─────────────────────────────────────────────── */
+/* width/height are set via HTML attributes per context; this class handles  */
+/* rendering quality only.                                                    */
+.tool-icon-img {
+  object-fit: contain;
+  display: block;
+  pointer-events: none;
+  flex-shrink: 0;
+}
+
+/* ── Room icon images (PNG) ─────────────────────────────────────────────── */
+.room-icon-img {
+  object-fit: contain;
+  display: block;
+  flex-shrink: 0;
+}
+
+/* ── Long-press / undo styles ───────────────────────────────────────────── */
+
+/* Pulse ring that grows during the 2s hold */
+@keyframes tool-press-pulse {
+  0%   { box-shadow: 0 0 0 0   rgba(46, 204, 143, 0.40); transform: scale(1.00); }
+  50%  { box-shadow: 0 0 0 8px rgba(46, 204, 143, 0.15); transform: scale(0.94); }
+  100% { box-shadow: 0 0 0 0   rgba(46, 204, 143, 0.00); transform: scale(1.00); }
+}
+
+.tool-mark-btn-pressing {
+  animation: tool-press-pulse 2s ease-in-out forwards;
+}
+
+/* "↩ Undone" inline confirmation */
+.tool-undo-flash {
+  font-size: 12px;
+  margin-top: 2px;
+  color: var(--teal);
+  font-weight: 600;
+  animation: fade-in-out 2s ease forwards;
+}
+
+@keyframes fade-in-out {
+  0%   { opacity: 0;    transform: translateY(2px); }
+  15%  { opacity: 1;    transform: translateY(0); }
+  75%  { opacity: 1; }
+  100% { opacity: 0; }
+}
 
 .tool-controls {
   display: flex;

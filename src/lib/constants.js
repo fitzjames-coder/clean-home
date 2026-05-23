@@ -1,22 +1,22 @@
 export const ROOM_ICONS = [
-  { value: 'bedroom',     label: 'Bedroom',     emoji: '🛏️' },
-  { value: 'bathroom',    label: 'Bathroom',    emoji: '🚿' },
-  { value: 'kids-room',   label: "Kids' Room",  emoji: '🧸' },
-  { value: 'kitchen',     label: 'Kitchen',     emoji: '🍳' },
-  { value: 'hallway',     label: 'Hallway',     emoji: '🚪' },
-  { value: 'living-room', label: 'Living Room', emoji: '🛋️' },
-  { value: 'dining-room', label: 'Dining Room', iconUrl: '/room-icons/dining-room.svg' },
-  { value: 'home-office', label: 'Home Office', emoji: '💻' },
-  { value: 'garage',      label: 'Garage',      emoji: '🚗' },
-  { value: 'garden',      label: 'Garden',      emoji: '🌱' },
+  { value: 'bedroom',     label: 'Bedroom',     iconUrl: '/room-icons/bedroom.png' },
+  { value: 'bathroom',    label: 'Bathroom',    iconUrl: '/room-icons/bathroom.png' },
+  { value: 'kids-room',   label: "Kid's Room",  iconUrl: '/room-icons/kids-room.png' },
+  { value: 'kitchen',     label: 'Kitchen',     iconUrl: '/room-icons/kitchen.png' },
+  { value: 'hallway',     label: 'Hallway',     iconUrl: '/room-icons/hallway.png' },
+  { value: 'living-room', label: 'Living Room', iconUrl: '/room-icons/living-room.png' },
+  { value: 'dining-room', label: 'Dining Room', iconUrl: '/room-icons/dining-room.png' },
+  { value: 'home-office', label: 'Home Office', iconUrl: '/room-icons/home-office.png' },
+  { value: 'garage',      label: 'Garage',      iconUrl: '/room-icons/garage.png' },
+  { value: 'garden',      label: 'Garden',      iconUrl: '/room-icons/garden.png' },
 ];
 
 export const TOOL_META = {
-  duster: { label: 'Duster',     iconUrl: '/tool-icons/duster.svg',     description: 'Dust surfaces, shelves, and decor' },
-  broom:  { label: 'Sweeping',   iconUrl: '/tool-icons/sweeping.svg',   description: 'Sweep floors and corners' },
-  mop:    { label: 'Mopping',    iconUrl: '/tool-icons/mopping.svg',    description: 'Mop hard floors' },
-  vacuum: { label: 'Vacuum',     iconUrl: '/tool-icons/vacuum.svg',     description: 'Vacuum carpets and rugs' },
-  bot:    { label: 'Vacuum Bot', iconUrl: '/tool-icons/vacuumbot.svg',  description: 'Run robot vacuum or automated clean' },
+  duster: { label: 'Duster',     iconUrl: '/tool-icons/duster.png',  description: 'Dust surfaces, shelves, and decor' },
+  broom:  { label: 'Sweeping',   iconUrl: '/tool-icons/broom.png',   description: 'Sweep floors and corners' },
+  mop:    { label: 'Mopping',    iconUrl: '/tool-icons/mop.png',     description: 'Mop hard floors' },
+  vacuum: { label: 'Vacuum',     iconUrl: '/tool-icons/vacuum.png',  description: 'Vacuum carpets and rugs' },
+  bot:    { label: 'Vacuum Bot', iconUrl: '/tool-icons/bot.png',     description: 'Run robot vacuum or automated clean' },
 };
 
 export const FREQUENCY_META = {

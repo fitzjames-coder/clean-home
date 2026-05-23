@@ -1,7 +1,9 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { supabase } from '../lib/supabase.js';
 import { TOOL_META, FREQUENCY_META, isDue, formatLastCleaned, formatLastCleanedFull } from '../lib/constants.js';
 import FrequencySelector from './FrequencySelector.jsx';
+
+const LONG_PRESS_MS = 2000;
 
 export default function ToolCard({ tool, onUpdate }) {
   const [expanded,       setExpanded]       = useState(false);
@@ -9,6 +11,16 @@ export default function ToolCard({ tool, onUpdate }) {
   const [savingInstr,    setSavingInstr]    = useState(false);
   const [markingDone,    setMarkingDone]    = useState(false);
   const [togglingActive, setTogglingActive] = useState(false);
+
+  // ── Undo state ────────────────────────────────────────────────────────────
+  // prevCompleted: the last_completed value before the most recent mark-done
+  // undoFlash:    show "Undone" confirmation briefly
+  // pressing:     long-press in progress (drives pulse animation)
+  const [prevCompleted, setPrevCompleted] = useState(null);
+  const [undoFlash,     setUndoFlash]     = useState(false);
+  const [pressing,      setPressing]      = useState(false);
+  const longPressTimer  = useRef(null);
+  const undoFlashTimer  = useRef(null);
 
   const meta     = TOOL_META[tool.tool_type];
   const due      = isDue(tool.last_completed, tool.frequency);
@@ -20,6 +32,8 @@ export default function ToolCard({ tool, onUpdate }) {
   async function markDone() {
     if (markingDone) return;
     setMarkingDone(true);
+    // Remember where we were so the user can undo
+    setPrevCompleted(tool.last_completed ?? null);
     const now = new Date().toISOString();
     const { error } = await supabase
       .from('clean_home_tools')
@@ -27,6 +41,23 @@ export default function ToolCard({ tool, onUpdate }) {
       .eq('id', tool.id);
     if (!error) onUpdate({ last_completed: now });
     setMarkingDone(false);
+  }
+
+  async function undoMarkDone() {
+    // Revert to the stored previous value (null means "never cleaned")
+    const prev = prevCompleted;
+    const { error } = await supabase
+      .from('clean_home_tools')
+      .update({ last_completed: prev })
+      .eq('id', tool.id);
+    if (!error) {
+      onUpdate({ last_completed: prev });
+      setPrevCompleted(null);
+      // Show brief "Undone" flash
+      setUndoFlash(true);
+      clearTimeout(undoFlashTimer.current);
+      undoFlashTimer.current = setTimeout(() => setUndoFlash(false), 2000);
+    }
   }
 
   async function toggleActive() {
@@ -54,6 +85,27 @@ export default function ToolCard({ tool, onUpdate }) {
     await supabase.from('clean_home_tools').update({ instructions }).eq('id', tool.id);
     onUpdate({ instructions });
     setSavingInstr(false);
+  }
+
+  // ── Long-press handlers (undo gesture) ───────────────────────────────────
+
+  function handlePressStart(e) {
+    // Only handle long-press when tool has been marked done at some point
+    if (!tool.last_completed) return;
+    e.preventDefault();          // prevent text selection on mobile
+    setPressing(true);
+    longPressTimer.current = setTimeout(() => {
+      setPressing(false);
+      undoMarkDone();
+    }, LONG_PRESS_MS);
+  }
+
+  function handlePressEnd() {
+    if (longPressTimer.current) {
+      clearTimeout(longPressTimer.current);
+      longPressTimer.current = null;
+    }
+    setPressing(false);
   }
 
   // ── Icon helper ───────────────────────────────────────────────────────────
@@ -107,12 +159,16 @@ export default function ToolCard({ tool, onUpdate }) {
   return (
     <div className={`tool-card ${stateClass}`}>
       <div className="tool-card-main">
-        {/* Mark-done button */}
+        {/* Mark-done button — tap: mark done; long-press: undo */}
         <button
-          className={`tool-mark-btn ${stateClass}`}
+          className={`tool-mark-btn ${stateClass}${pressing ? ' tool-mark-btn-pressing' : ''}`}
           onClick={markDone}
+          onPointerDown={handlePressStart}
+          onPointerUp={handlePressEnd}
+          onPointerLeave={handlePressEnd}
+          onPointerCancel={handlePressEnd}
           disabled={markingDone}
-          title="Mark as cleaned"
+          title={tool.last_completed ? 'Tap to mark done · Hold 2s to undo' : 'Mark as cleaned'}
         >
           <ToolIcon size={26} />
         </button>
@@ -125,9 +181,16 @@ export default function ToolCard({ tool, onUpdate }) {
               {FREQUENCY_META[tool.frequency].shortLabel}
             </span>
           </div>
-          <div className={`tool-last-cleaned ${stateClass}`} title={lastFull}>
-            {last}
-          </div>
+          {undoFlash ? (
+            <div className="tool-undo-flash">↩ Undone</div>
+          ) : (
+            <div
+              className={`tool-last-cleaned ${last === 'Never' ? 'never' : stateClass}`}
+              title={lastFull}
+            >
+              {last}
+            </div>
+          )}
         </div>
 
         {/* Controls */}

@@ -11,6 +11,7 @@ export default function ToolCard({ tool, onUpdate }) {
   const [togglingActive, setTogglingActive] = useState(false);
 
   const meta     = TOOL_META[tool.tool_type];
+  const ToolIcon = meta?.Icon ?? null;
   const due      = isDue(tool.last_completed, tool.frequency);
   const last     = formatLastCleaned(tool.last_completed);
   const lastFull = formatLastCleanedFull(tool.last_completed);
@@ -62,7 +63,10 @@ export default function ToolCard({ tool, onUpdate }) {
     return (
       <div className="tool-card inactive">
         <div className="tool-card-main">
-          <span style={{ fontSize: 28, filter: 'grayscale(1)' }}>{meta.emoji}</span>
+          {ToolIcon
+            ? <ToolIcon size={26} color="var(--text-muted)" />
+            : <span style={{ fontSize: 28, filter: 'grayscale(1)' }}>{meta.emoji}</span>
+          }
           <div className="tool-info">
             <div className="tool-name">{meta.label}</div>
             <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>Inactive</div>
@@ -96,7 +100,10 @@ export default function ToolCard({ tool, onUpdate }) {
           disabled={markingDone}
           title="Mark as cleaned"
         >
-          {meta.emoji}
+          {ToolIcon
+            ? <ToolIcon size={24} color={due ? 'var(--blue)' : '#1aaa72'} />
+            : meta.emoji
+          }
         </button>
 
         {/* Info */}

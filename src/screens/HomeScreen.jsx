@@ -23,8 +23,14 @@ export default function HomeScreen() {
     setConfirmDeleteId(null);
   }
 
-  function getRoomEmoji(iconValue) {
-    return ROOM_ICONS.find(i => i.value === iconValue)?.emoji ?? '🏠';
+  function renderRoomIcon(iconValue) {
+    const meta = ROOM_ICONS.find(i => i.value === iconValue);
+    if (!meta) return '🏠';
+    if (meta.Icon) {
+      const RoomIcon = meta.Icon;
+      return <RoomIcon size={28} color="var(--blue)" />;
+    }
+    return meta.emoji;
   }
 
   return (
@@ -76,7 +82,7 @@ export default function HomeScreen() {
             return (
             <div key={room.id} className={`room-card${statusClass}`}>
               <button className="room-card-btn" onClick={() => goToRoom(room.id)}>
-                <div className="room-icon-wrap">{getRoomEmoji(room.icon)}</div>
+                <div className="room-icon-wrap">{renderRoomIcon(room.icon)}</div>
                 <div className="room-info">
                   <div className="room-name">{room.name}</div>
                   {room.remarks ? (

@@ -134,7 +134,8 @@ export default function RoomDetailScreen({ roomId }) {
 
   // ── Render ─────────────────────────────────────────────────────────────────
 
-  const roomMeta = room ? ROOM_ICONS.find(i => i.value === room.icon) : null;
+  const roomMeta     = room ? ROOM_ICONS.find(i => i.value === room.icon) : null;
+  const RoomHeroIcon = roomMeta?.Icon ?? null;
 
   if (loading) {
     return (
@@ -169,7 +170,12 @@ export default function RoomDetailScreen({ roomId }) {
             onClick={() => setConfirmMarkAll(true)}
             title="Mark all tools as done"
           >
-            <div className="room-hero-icon">{roomMeta?.emoji ?? '🏠'}</div>
+            <div className="room-hero-icon">
+              {RoomHeroIcon
+                ? <RoomHeroIcon size={36} color="var(--blue)" />
+                : (roomMeta?.emoji ?? '🏠')
+              }
+            </div>
           </button>
           <div>
             <div className="room-detail-name">{room.name}</div>

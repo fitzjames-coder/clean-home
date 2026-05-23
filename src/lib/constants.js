@@ -1,3 +1,10 @@
+import DusterIcon     from '../components/icons/DusterIcon.jsx';
+import SweepingIcon   from '../components/icons/SweepingIcon.jsx';
+import MoppingIcon    from '../components/icons/MoppingIcon.jsx';
+import VacuumIcon     from '../components/icons/VacuumIcon.jsx';
+import VacuumBotIcon  from '../components/icons/VacuumBotIcon.jsx';
+import DiningRoomIcon from '../components/icons/DiningRoomIcon.jsx';
+
 export const ROOM_ICONS = [
   { value: 'bedroom',     label: 'Bedroom',     emoji: '🛏️' },
   { value: 'bathroom',    label: 'Bathroom',    emoji: '🚿' },
@@ -5,18 +12,18 @@ export const ROOM_ICONS = [
   { value: 'kitchen',     label: 'Kitchen',     emoji: '🍳' },
   { value: 'hallway',     label: 'Hallway',     emoji: '🚪' },
   { value: 'living-room', label: 'Living Room', emoji: '🛋️' },
-  { value: 'dining-room', label: 'Dining Room', emoji: '🪑' },
+  { value: 'dining-room', label: 'Dining Room', Icon: DiningRoomIcon },
   { value: 'home-office', label: 'Home Office', emoji: '💻' },
   { value: 'garage',      label: 'Garage',      emoji: '🚗' },
   { value: 'garden',      label: 'Garden',      emoji: '🌱' },
 ];
 
 export const TOOL_META = {
-  duster: { label: 'Duster', emoji: '🪣', description: 'Dust surfaces, shelves, and decor' },
-  broom:  { label: 'Broom',  emoji: '🧹', description: 'Sweep floors and corners' },
-  mop:    { label: 'Mop',    emoji: '🫧', description: 'Mop hard floors' },
-  vacuum: { label: 'Vacuum', emoji: '🌀', description: 'Vacuum carpets and rugs' },
-  bot:    { label: 'Bot',    emoji: '🤖', description: 'Run robot vacuum or automated clean' },
+  duster: { label: 'Duster',     Icon: DusterIcon,    description: 'Dust surfaces, shelves, and decor' },
+  broom:  { label: 'Sweeping',   Icon: SweepingIcon,  description: 'Sweep floors and corners' },
+  mop:    { label: 'Mopping',    Icon: MoppingIcon,   description: 'Mop hard floors' },
+  vacuum: { label: 'Vacuum',     Icon: VacuumIcon,    description: 'Vacuum carpets and rugs' },
+  bot:    { label: 'Vacuum Bot', Icon: VacuumBotIcon, description: 'Run robot vacuum or automated clean' },
 };
 
 export const FREQUENCY_META = {
@@ -109,7 +116,7 @@ export function roomStatus(tools) {
 
 /**
  * Returns active overdue/critical tools sorted by TOOL_ORDER.
- * Each entry is { tool_type, frequency } — enough to render "Duster: W".
+ * Each entry is { tool_type, frequency } — enough to render "Sweeping: W".
  * Returns [] when all tools are on track.
  *
  * Requires tools rows to include `tool_type` (fetched from clean_home_tools).

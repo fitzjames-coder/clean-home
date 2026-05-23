@@ -56,13 +56,31 @@ export default function ToolCard({ tool, onUpdate }) {
     setSavingInstr(false);
   }
 
+  // ── Icon helper ───────────────────────────────────────────────────────────
+
+  function ToolIcon({ size = 26, style = {} }) {
+    if (meta?.iconUrl) {
+      return (
+        <img
+          src={meta.iconUrl}
+          alt={meta.label}
+          width={size}
+          height={size}
+          className="tool-icon-img"
+          style={style}
+        />
+      );
+    }
+    return <span style={{ fontSize: size, ...style }}>{meta?.emoji ?? '?'}</span>;
+  }
+
   // ── Inactive state ────────────────────────────────────────────────────────
 
   if (!tool.is_active) {
     return (
       <div className="tool-card inactive">
         <div className="tool-card-main">
-          <span style={{ fontSize: 28, filter: 'grayscale(1)' }}>{meta.emoji}</span>
+          <ToolIcon size={28} style={{ filter: 'grayscale(1)', opacity: 0.6 }} />
           <div className="tool-info">
             <div className="tool-name">{meta.label}</div>
             <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>Inactive</div>
@@ -96,7 +114,7 @@ export default function ToolCard({ tool, onUpdate }) {
           disabled={markingDone}
           title="Mark as cleaned"
         >
-          {meta.emoji}
+          <ToolIcon size={26} />
         </button>
 
         {/* Info */}

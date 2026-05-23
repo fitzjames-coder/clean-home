@@ -157,7 +157,7 @@ export default function RoomDetailScreen({ roomId }) {
     <div className="screen">
       {/* ── Header ── */}
       <div className="room-header">
-        <button className="back-btn" onClick={handleBack}>
+        <button className="back-btn back-btn-pill" onClick={handleBack}>
           <span className="back-btn-icon">←</span>
           All Rooms
         </button>
@@ -169,7 +169,12 @@ export default function RoomDetailScreen({ roomId }) {
             onClick={() => setConfirmMarkAll(true)}
             title="Mark all tools as done"
           >
-            <div className="room-hero-icon">{roomMeta?.emoji ?? '🏠'}</div>
+            <div className="room-hero-icon">
+              {roomMeta?.iconUrl
+                ? <img src={roomMeta.iconUrl} alt={roomMeta.label} width={40} height={40} className="room-icon-img" />
+                : (roomMeta?.emoji ?? '🏠')
+              }
+            </div>
           </button>
           <div>
             <div className="room-detail-name">{room.name}</div>

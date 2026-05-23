@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useApp } from '../context/AppContext.jsx';
-import { ROOM_ICONS, TOOL_META, roomStatus, overdueToolsForRoom } from '../lib/constants.js';
+import { ROOM_ICONS, TOOL_META, roomStatus, overdueToolsForRoom, formatLastCleaned } from '../lib/constants.js';
 import { supabase } from '../lib/supabase.js';
 import AddRoomModal from '../components/AddRoomModal.jsx';
 
@@ -23,8 +23,22 @@ export default function HomeScreen() {
     setConfirmDeleteId(null);
   }
 
-  function getRoomEmoji(iconValue) {
-    return ROOM_ICONS.find(i => i.value === iconValue)?.emoji ?? '🏠';
+  /** Render either a custom img or the native emoji for a room's icon slot. */
+  function renderRoomIcon(iconValue) {
+    const meta = ROOM_ICONS.find(i => i.value === iconValue);
+    if (!meta) return '🏠';
+    if (meta.iconUrl) {
+      return (
+        <img
+          src={meta.iconUrl}
+          alt={meta.label}
+          width={32}
+          height={32}
+          className="room-icon-img"
+        />
+      );
+    }
+    return meta.emoji;
   }
 
   return (
@@ -76,7 +90,7 @@ export default function HomeScreen() {
             return (
             <div key={room.id} className={`room-card${statusClass}`}>
               <button className="room-card-btn" onClick={() => goToRoom(room.id)}>
-                <div className="room-icon-wrap">{getRoomEmoji(room.icon)}</div>
+                <div className="room-icon-wrap">{renderRoomIcon(room.icon)}</div>
                 <div className="room-info">
                   <div className="room-name">{room.name}</div>
                   {room.remarks ? (
@@ -87,7 +101,7 @@ export default function HomeScreen() {
                       ? <div className="room-overdue-tools">
                           {overdue.map(t => (
                             <div key={t.tool_type} className="room-overdue-line">
-                              {TOOL_META[t.tool_type].label}: {t.frequency}
+                              {TOOL_META[t.tool_type].label}: {t.frequency} | {formatLastCleaned(t.last_completed)}
                             </div>
                           ))}
                         </div>

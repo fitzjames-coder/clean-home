@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+  <defs>
+    <linearGradient id="handle" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#E8C070"/>
+      <stop offset="45%"  stop-color="#C49A3C"/>
+      <stop offset="100%" stop-color="#7D5A0D"/>
+    </linearGradient>
+    <filter id="shadow" x="-12%" y="-12%" width="124%" height="124%">
+      <feDropShadow dx="2" dy="4" stdDeviation="6" flood-color="rgba(0,0,0,0.22)"/>
+    </filter>
+    <filter id="fsm" x="-15%" y="-15%" width="130%" height="130%">
+      <feDropShadow dx="1" dy="2" stdDeviation="4" flood-color="rgba(0,0,0,0.14)"/>
+    </filter>
+    <radialGradient id="glow-gold" cx="35%" cy="35%" r="65%">
+      <stop offset="0%"   stop-color="#FFE066"/>
+      <stop offset="100%" stop-color="#F9CA24"/>
+    </radialGradient>
+  </defs>
+
+  <!-- ── Handle (thick diagonal stick) ── -->
+  <line x1="212" y1="228" x2="90" y2="108"
+        stroke="url(#handle)" stroke-width="24" stroke-linecap="round"
+        filter="url(#shadow)"/>
+  <!-- highlight stripe -->
+  <line x1="210" y1="228" x2="88" y2="108"
+        stroke="rgba(255,255,255,0.30)" stroke-width="8" stroke-linecap="round"/>
+  <!-- wood grain -->
+  <line x1="175" y1="148" x2="186" y2="138" stroke="rgba(100,65,5,0.45)" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="152" y1="171" x2="163" y2="161" stroke="rgba(100,65,5,0.35)" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="130" y1="194" x2="141" y2="184" stroke="rgba(100,65,5,0.30)" stroke-width="2.5" stroke-linecap="round"/>
+
+  <!-- ── Binding collar ── -->
+  <circle cx="90" cy="108" r="15" fill="#6B4A08" filter="url(#shadow)"/>
+  <circle cx="90" cy="108" r="11" fill="#9B7222"/>
+  <circle cx="86" cy="104" r="5"  fill="rgba(255,255,255,0.28)"/>
+
+  <!-- ── Feathers (6 colorful leaf shapes from binding outward) ── -->
+  <!-- Each: M base Q ctrl tip Q ctrl2 base -->
+  <!-- Feather 1 — deep purple, upper-left -->
+  <path d="M 90 108 Q 44 82 22 38 Q 58 68 90 108" fill="#7D3C98" filter="url(#fsm)"/>
+  <path d="M 90 108 Q 46 84 24 40" fill="none" stroke="#A855C8" stroke-width="1.5" opacity="0.5"/>
+
+  <!-- Feather 2 — hot pink, left-up -->
+  <path d="M 90 108 Q 52 95 46 60 Q 70 86 90 108" fill="#D91E8C" filter="url(#fsm)"/>
+
+  <!-- Feather 3 — lavender, straight up -->
+  <path d="M 90 108 Q 82 68 90 32 Q 96 70 90 108" fill="#C39BD3" filter="url(#fsm)"/>
+
+  <!-- Feather 4 — teal, upper-right -->
+  <path d="M 90 108 Q 112 68 132 38 Q 110 74 90 108" fill="#17A589" filter="url(#fsm)"/>
+
+  <!-- Feather 5 — golden orange, right-upper -->
+  <path d="M 90 108 Q 134 76 154 54 Q 128 82 90 108" fill="#E67E22" filter="url(#fsm)"/>
+
+  <!-- Feather 6 — coral red, pointing right -->
+  <path d="M 90 108 Q 146 98 164 86 Q 134 100 90 108" fill="#E74C3C" filter="url(#fsm)"/>
+
+  <!-- ── Center dot over collar ── -->
+  <circle cx="90" cy="108" r="6" fill="#3D2000"/>
+
+  <!-- ── Sparkle stars ── -->
+  <circle cx="52" cy="38"  r="6" fill="url(#glow-gold)"/>
+  <circle cx="148" cy="46" r="5" fill="url(#glow-gold)"/>
+  <circle cx="30"  cy="72" r="4" fill="url(#glow-gold)"/>
+  <circle cx="166" cy="86" r="4" fill="url(#glow-gold)"/>
+  <circle cx="90"  cy="24" r="4" fill="url(#glow-gold)"/>
+</svg>

@@ -1,0 +1,99 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+  <defs>
+    <linearGradient id="handle" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="#E8C070"/>
+      <stop offset="50%"  stop-color="#C49A3C"/>
+      <stop offset="100%" stop-color="#7D5A0D"/>
+    </linearGradient>
+    <linearGradient id="bucket-body" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%"   stop-color="#3498DB"/>
+      <stop offset="100%" stop-color="#1A6FAF"/>
+    </linearGradient>
+    <linearGradient id="bucket-face" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%"   stop-color="#1F8DD6"/>
+      <stop offset="100%" stop-color="#1460A0"/>
+    </linearGradient>
+    <linearGradient id="water" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%"   stop-color="#74C6E8"/>
+      <stop offset="100%" stop-color="#4AAFD8"/>
+    </linearGradient>
+    <filter id="shadow" x="-12%" y="-12%" width="124%" height="124%">
+      <feDropShadow dx="2" dy="4" stdDeviation="6" flood-color="rgba(0,0,0,0.22)"/>
+    </filter>
+  </defs>
+
+  <!-- ════ MOP (left: x 20-135) ════ -->
+
+  <!-- Handle -->
+  <line x1="75" y1="16" x2="75" y2="168"
+        stroke="url(#handle)" stroke-width="20" stroke-linecap="round"
+        filter="url(#shadow)"/>
+  <line x1="70" y1="16" x2="70" y2="168"
+        stroke="rgba(255,255,255,0.30)" stroke-width="6" stroke-linecap="round"/>
+  <!-- grain -->
+  <line x1="68" y1="68"  x2="82" y2="68"  stroke="rgba(90,55,5,0.35)" stroke-width="2" stroke-linecap="round"/>
+  <line x1="68" y1="110" x2="82" y2="110" stroke="rgba(90,55,5,0.30)" stroke-width="2" stroke-linecap="round"/>
+
+  <!-- Cross-bar / mop head clamp -->
+  <rect x="28" y="160" width="94" height="16" rx="6"
+        fill="#6B4A08" filter="url(#shadow)"/>
+  <rect x="30" y="161" width="90" height="8" rx="4"
+        fill="rgba(255,255,255,0.15)"/>
+
+  <!-- Mop strings (8 strands, slightly fanned, light gray-blue) -->
+  <g stroke-linecap="round" opacity="0.92">
+    <line x1="34"  y1="176" x2="32"  y2="248" stroke="#D8E2EC" stroke-width="7"/>
+    <line x1="46"  y1="176" x2="44"  y2="250" stroke="#C8D8E8" stroke-width="7"/>
+    <line x1="58"  y1="176" x2="57"  y2="251" stroke="#D8E2EC" stroke-width="7"/>
+    <line x1="70"  y1="176" x2="70"  y2="252" stroke="#EEF2F6" stroke-width="7"/>
+    <line x1="82"  y1="176" x2="82"  y2="252" stroke="#D8E2EC" stroke-width="7"/>
+    <line x1="94"  y1="176" x2="95"  y2="251" stroke="#C8D8E8" stroke-width="7"/>
+    <line x1="106" y1="176" x2="108" y2="250" stroke="#D8E2EC" stroke-width="7"/>
+    <line x1="118" y1="176" x2="121" y2="248" stroke="#C0D0E0" stroke-width="7"/>
+  </g>
+  <!-- string tips: small rounded caps -->
+  <g fill="#C0D0E0">
+    <ellipse cx="32"  cy="249" rx="4" ry="5"/>
+    <ellipse cx="44"  cy="251" rx="4" ry="5"/>
+    <ellipse cx="57"  cy="252" rx="4" ry="5"/>
+    <ellipse cx="70"  cy="253" rx="4" ry="5"/>
+    <ellipse cx="82"  cy="253" rx="4" ry="5"/>
+    <ellipse cx="95"  cy="252" rx="4" ry="5"/>
+    <ellipse cx="108" cy="251" rx="4" ry="5"/>
+    <ellipse cx="121" cy="249" rx="4" ry="5"/>
+  </g>
+
+  <!-- ════ BUCKET (right: x 145-248) ════ -->
+
+  <!-- Bucket handle arc -->
+  <path d="M 164 122 Q 196 96 228 122"
+        stroke="#95A5A6" stroke-width="10" stroke-linecap="round" fill="none"
+        filter="url(#shadow)"/>
+  <!-- handle highlight -->
+  <path d="M 164 122 Q 196 96 228 122"
+        stroke="rgba(255,255,255,0.35)" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+
+  <!-- Bucket body (trapezoid, wider at bottom) -->
+  <!-- Left wall -->
+  <path d="M 155 130 L 143 240 L 249 240 L 237 130 Z"
+        fill="url(#bucket-body)" filter="url(#shadow)"/>
+  <!-- 3-D lighter side sheen -->
+  <path d="M 155 130 L 143 240 L 156 240 L 167 130 Z"
+        fill="rgba(255,255,255,0.12)"/>
+  <!-- Rim -->
+  <rect x="152" y="120" width="88" height="14" rx="5"
+        fill="#2471A3"/>
+  <rect x="154" y="121" width="84" height="6" rx="3"
+        fill="rgba(255,255,255,0.20)"/>
+  <!-- Water surface inside bucket -->
+  <path d="M 158 150 L 238 150 L 248 155 L 148 155 Z"
+        fill="url(#water)" opacity="0.75"/>
+  <!-- Bucket shine streak -->
+  <line x1="162" y1="134" x2="168" y2="234"
+        stroke="rgba(255,255,255,0.18)" stroke-width="8" stroke-linecap="round"/>
+
+  <!-- Sparkle near bucket -->
+  <circle cx="246" cy="155" r="5" fill="#F9CA24"/>
+  <circle cx="252" cy="142" r="3.5" fill="#F9CA24" opacity="0.80"/>
+  <circle cx="142" cy="148" r="3"   fill="#F9CA24" opacity="0.70"/>
+</svg>

@@ -10,7 +10,10 @@ export default function RoomIconPicker({ value, onChange }) {
           className={`icon-picker-btn${value === icon.value ? ' selected' : ''}`}
           onClick={() => onChange(icon.value)}
         >
-          {icon.emoji}
+          {icon.iconUrl
+            ? <img src={icon.iconUrl} alt={icon.label} width={32} height={32} className="room-icon-img" />
+            : icon.emoji
+          }
           <span>{icon.label}</span>
         </button>
       ))}

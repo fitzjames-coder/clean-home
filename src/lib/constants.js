@@ -1,22 +1,22 @@
 export const ROOM_ICONS = [
-  { value: 'bedroom',     label: 'Bedroom',     iconUrl: '/room-icons/bedroom.PNG' },
-  { value: 'bathroom',    label: 'Bathroom',    iconUrl: '/room-icons/bathroom.PNG' },
-  { value: 'kids-room',   label: "Kid's Room",  iconUrl: '/room-icons/kids-room.PNG' },
-  { value: 'kitchen',     label: 'Kitchen',     iconUrl: '/room-icons/kitchen.PNG' },
-  { value: 'hallway',     label: 'Hallway',     iconUrl: '/room-icons/hallway.PNG' },
-  { value: 'living-room', label: 'Living Room', iconUrl: '/room-icons/living-room.PNG' },
-  { value: 'dining-room', label: 'Dining Room', iconUrl: '/room-icons/dining-room.PNG' },
-  { value: 'home-office', label: 'Home Office', iconUrl: '/room-icons/home-office.PNG' },
-  { value: 'garage',      label: 'Garage',      iconUrl: '/room-icons/garage.PNG' },
-  { value: 'garden',      label: 'Garden',      iconUrl: '/room-icons/garden.PNG' },
+  { value: 'bedroom',     label: 'Bedroom',     iconUrl: '/room-icons/bedroom.png' },
+  { value: 'bathroom',    label: 'Bathroom',    iconUrl: '/room-icons/bathroom.png' },
+  { value: 'kids-room',   label: "Kid's Room",  iconUrl: '/room-icons/kids-room.png' },
+  { value: 'kitchen',     label: 'Kitchen',     iconUrl: '/room-icons/kitchen.png' },
+  { value: 'hallway',     label: 'Hallway',     iconUrl: '/room-icons/hallway.png' },
+  { value: 'living-room', label: 'Living Room', iconUrl: '/room-icons/living-room.png' },
+  { value: 'dining-room', label: 'Dining Room', iconUrl: '/room-icons/dining-room.png' },
+  { value: 'home-office', label: 'Home Office', iconUrl: '/room-icons/home-office.png' },
+  { value: 'garage',      label: 'Garage',      iconUrl: '/room-icons/garage.png' },
+  { value: 'garden',      label: 'Garden',      iconUrl: '/room-icons/garden.png' },
 ];
 
 export const TOOL_META = {
-  duster: { label: 'Duster',     iconUrl: '/tool-icons/duster.PNG',  description: 'Dust surfaces, shelves, and decor' },
-  broom:  { label: 'Sweeping',   iconUrl: '/tool-icons/broom.PNG',   description: 'Sweep floors and corners' },
-  mop:    { label: 'Mopping',    iconUrl: '/tool-icons/mop.PNG',     description: 'Mop hard floors' },
-  vacuum: { label: 'Vacuum',     iconUrl: '/tool-icons/vacuum.PNG',  description: 'Vacuum carpets and rugs' },
-  bot:    { label: 'Vacuum Bot', iconUrl: '/tool-icons/bot.PNG',     description: 'Run robot vacuum or automated clean' },
+  duster: { label: 'Duster',     iconUrl: '/tool-icons/duster.png',  description: 'Dust surfaces, shelves, and decor' },
+  broom:  { label: 'Sweeping',   iconUrl: '/tool-icons/broom.png',   description: 'Sweep floors and corners' },
+  mop:    { label: 'Mopping',    iconUrl: '/tool-icons/mop.png',     description: 'Mop hard floors' },
+  vacuum: { label: 'Vacuum',     iconUrl: '/tool-icons/vacuum.png',  description: 'Vacuum carpets and rugs' },
+  bot:    { label: 'Vacuum Bot', iconUrl: '/tool-icons/bot.png',     description: 'Run robot vacuum or automated clean' },
 };
 
 export const FREQUENCY_META = {

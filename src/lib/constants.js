@@ -5,18 +5,18 @@ export const ROOM_ICONS = [
   { value: 'kitchen',     label: 'Kitchen',     emoji: '🍳' },
   { value: 'hallway',     label: 'Hallway',     emoji: '🚪' },
   { value: 'living-room', label: 'Living Room', emoji: '🛋️' },
-  { value: 'dining-room', label: 'Dining Room', emoji: '🪑' },
+  { value: 'dining-room', label: 'Dining Room', iconUrl: '/room-icons/dining-room.svg' },
   { value: 'home-office', label: 'Home Office', emoji: '💻' },
   { value: 'garage',      label: 'Garage',      emoji: '🚗' },
   { value: 'garden',      label: 'Garden',      emoji: '🌱' },
 ];
 
 export const TOOL_META = {
-  duster: { label: 'Duster', emoji: '🪣', description: 'Dust surfaces, shelves, and decor' },
-  broom:  { label: 'Broom',  emoji: '🧹', description: 'Sweep floors and corners' },
-  mop:    { label: 'Mop',    emoji: '🫧', description: 'Mop hard floors' },
-  vacuum: { label: 'Vacuum', emoji: '🌀', description: 'Vacuum carpets and rugs' },
-  bot:    { label: 'Bot',    emoji: '🤖', description: 'Run robot vacuum or automated clean' },
+  duster: { label: 'Duster',     iconUrl: '/tool-icons/duster.svg',     description: 'Dust surfaces, shelves, and decor' },
+  broom:  { label: 'Sweeping',   iconUrl: '/tool-icons/sweeping.svg',   description: 'Sweep floors and corners' },
+  mop:    { label: 'Mopping',    iconUrl: '/tool-icons/mopping.svg',    description: 'Mop hard floors' },
+  vacuum: { label: 'Vacuum',     iconUrl: '/tool-icons/vacuum.svg',     description: 'Vacuum carpets and rugs' },
+  bot:    { label: 'Vacuum Bot', iconUrl: '/tool-icons/vacuumbot.svg',  description: 'Run robot vacuum or automated clean' },
 };
 
 export const FREQUENCY_META = {
@@ -40,16 +40,59 @@ export function isDue(lastCompleted, frequency) {
   return diffDays >= (thresholds[frequency] ?? 7);
 }
 
+/**
+ * Format a last-cleaned timestamp in the new style:
+ *   "May 23 | 5h ago"   — date (short, no year unless different) | rolling relative
+ *   "Never"             — when dateStr is null
+ *
+ * Relative tiers:
+ *   < 1 h  → "just now"
+ *   1–23 h → "5h ago"
+ *   24+ h  → "1 day ago", "3 days ago"
+ *   7+ d   → "1 week ago", "2 weeks ago"
+ *   30+ d  → "1 month ago", "2 months ago"
+ *
+ * Uses a rolling 24-hour window — NOT calendar-day boundaries.
+ */
 export function formatLastCleaned(dateStr) {
   if (!dateStr) return 'Never';
-  const diffMs  = Date.now() - new Date(dateStr).getTime();
+
+  const now      = Date.now();
+  const cleaned  = new Date(dateStr).getTime();
+  const diffMs   = now - cleaned;
+  const diffMins = diffMs / 60000;
+  const diffHrs  = diffMs / 3600000;
   const diffDays = diffMs / 86400000;
-  if (diffDays < 1)  return 'Today';
-  if (diffDays < 2)  return 'Yesterday';
-  const d = Math.floor(diffDays);
-  if (d < 7)  return `${d} days ago`;
-  const w = Math.floor(d / 7);
-  return `${w} week${w > 1 ? 's' : ''} ago`;
+
+  // Relative label
+  let relative;
+  if (diffMins < 60) {
+    relative = 'just now';
+  } else if (diffHrs < 24) {
+    const h = Math.floor(diffHrs);
+    relative = `${h}h ago`;
+  } else if (diffDays < 7) {
+    const d = Math.floor(diffDays);
+    relative = `${d} day${d !== 1 ? 's' : ''} ago`;
+  } else if (diffDays < 30) {
+    const w = Math.floor(diffDays / 7);
+    relative = `${w} week${w !== 1 ? 's' : ''} ago`;
+  } else {
+    const m = Math.floor(diffDays / 30);
+    relative = `${m} month${m !== 1 ? 's' : ''} ago`;
+  }
+
+  // Absolute date label — short month + day, add year only when different
+  const d        = new Date(dateStr);
+  const nowDate  = new Date(now);
+  const monthStr = d.toLocaleString('default', { month: 'short' });
+  const dayStr   = d.getDate();
+  const yearStr  = d.getFullYear() !== nowDate.getFullYear()
+    ? `, ${d.getFullYear()}`
+    : '';
+  const absDate  = `${monthStr} ${dayStr}${yearStr}`;
+
+  return `${absDate} | ${relative}`;
 }
 
 export function formatLastCleanedFull(dateStr) {
@@ -64,13 +107,6 @@ const CRITICAL_GRACE = 2.5; // days past threshold before escalating to critical
 
 /**
  * Returns 'ok' | 'overdue' | 'critical' for a single tool.
- *
- * - ok       : not yet past the frequency threshold
- * - overdue  : past threshold, but less than (threshold + 2.5) days overdue
- * - critical : at or beyond (threshold + 2.5) days overdue
- *
- * Never-cleaned tools (lastCompleted is null) return 'overdue'. We don't
- * escalate them to critical because we don't have created_at here.
  */
 export function toolStatus(lastCompleted, frequency) {
   const threshold = THRESHOLDS[frequency] ?? 7;
@@ -82,17 +118,8 @@ export function toolStatus(lastCompleted, frequency) {
 }
 
 /**
- * Returns the worst status across all active tools in a room.
- *
- * New majority rule (replaces the old single-tool 2.5-day critical threshold):
- *   - 'ok'       = zero active tools are overdue
- *   - 'overdue'  = ≥1 active tool overdue, but fewer than half are overdue
- *   - 'critical' = half or more active tools are overdue
- *                  (Math.ceil so 3 active tools → 2+ overdue = critical)
- *
- * toolStatus() is unchanged — ToolCard per-tool styling is unaffected.
- *
- * @param {Array<{is_active: boolean, last_completed: string|null, frequency: string}>} tools
+ * Returns 'ok' | 'overdue' | 'critical' for the room card.
+ * Majority rule: critical if ≥ Math.ceil(active/2) tools are overdue.
  */
 export function roomStatus(tools) {
   const active = tools.filter(t => t.is_active);
@@ -108,19 +135,15 @@ export function roomStatus(tools) {
 }
 
 /**
- * Returns active overdue/critical tools sorted by TOOL_ORDER.
- * Each entry is { tool_type, frequency } — enough to render "Duster: W".
- * Returns [] when all tools are on track.
+ * Returns active overdue/critical tools sorted by TOOL_ORDER, max 5.
+ * Includes last_completed so callers can display the new date format.
  *
- * Requires tools rows to include `tool_type` (fetched from clean_home_tools).
- *
- * @param {Array<{tool_type: string, is_active: boolean, last_completed: string|null, frequency: string}>} tools
- * @returns {Array<{tool_type: string, frequency: string}>}
+ * @returns {Array<{tool_type, frequency, last_completed}>}
  */
 export function overdueToolsForRoom(tools) {
   return tools
     .filter(t => t.is_active && toolStatus(t.last_completed, t.frequency) !== 'ok')
     .sort((a, b) => TOOL_ORDER.indexOf(a.tool_type) - TOOL_ORDER.indexOf(b.tool_type))
     .slice(0, 5)
-    .map(t => ({ tool_type: t.tool_type, frequency: t.frequency }));
+    .map(t => ({ tool_type: t.tool_type, frequency: t.frequency, last_completed: t.last_completed }));
 }

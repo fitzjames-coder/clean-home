@@ -77,7 +77,7 @@ export default function SuppliesScreen() {
       {/* ── Header ── */}
       <div className="supplies-header">
         <div>
-          <button className="back-btn" onClick={goHome}>
+          <button className="back-btn back-btn-pill" onClick={goHome}>
             <span className="back-btn-icon">←</span>
             All Rooms
           </button>

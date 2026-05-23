@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+  <defs>
+    <radialGradient id="disc-grad" cx="36%" cy="32%" r="68%">
+      <stop offset="0%"   stop-color="#5D6D7E"/>
+      <stop offset="55%"  stop-color="#2C3E50"/>
+      <stop offset="100%" stop-color="#1A252F"/>
+    </radialGradient>
+    <radialGradient id="ring-grad" cx="36%" cy="32%" r="68%">
+      <stop offset="0%"   stop-color="#85929E"/>
+      <stop offset="100%" stop-color="#5D6D7E"/>
+    </radialGradient>
+    <radialGradient id="sensor-grad" cx="38%" cy="35%" r="62%">
+      <stop offset="0%"   stop-color="#2ECC8F"/>
+      <stop offset="100%" stop-color="#0E9E6A"/>
+    </radialGradient>
+    <radialGradient id="btn-inner" cx="35%" cy="32%" r="60%">
+      <stop offset="0%"   stop-color="rgba(255,255,255,0.55)"/>
+      <stop offset="100%" stop-color="rgba(255,255,255,0.0)"/>
+    </radialGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="6" stdDeviation="10" flood-color="rgba(0,0,0,0.35)"/>
+    </filter>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- ── Main disc body ── -->
+  <circle cx="128" cy="130" r="108"
+          fill="url(#disc-grad)" filter="url(#shadow)"/>
+
+  <!-- ── Front direction bump (top edge, small arc suggesting "forward") ── -->
+  <path d="M 106 30 Q 128 20 150 30"
+        stroke="#3D5570" stroke-width="7" stroke-linecap="round" fill="none"/>
+
+  <!-- ── Side wheel bumpers ── -->
+  <ellipse cx="22"  cy="130" rx="8"  ry="22" fill="#3D5570"/>
+  <ellipse cx="234" cy="130" rx="8"  ry="22" fill="#3D5570"/>
+  <!-- bumper highlights -->
+  <ellipse cx="19"  cy="124" rx="3"  ry="9"  fill="rgba(255,255,255,0.18)"/>
+  <ellipse cx="231" cy="124" rx="3"  ry="9"  fill="rgba(255,255,255,0.18)"/>
+
+  <!-- ── Inner bumper ring (lighter circle) ── -->
+  <circle cx="128" cy="130" r="82"
+          fill="none" stroke="url(#ring-grad)" stroke-width="9"/>
+
+  <!-- ── Navigation / dirt-separator line ── -->
+  <path d="M 50 130 Q 128 100 206 130"
+        stroke="#3A4858" stroke-width="5" stroke-linecap="round" fill="none"/>
+
+  <!-- ── Left inner motion arc ── -->
+  <path d="M 72 88  Q 54 130 72 172"
+        stroke="rgba(255,255,255,0.18)" stroke-width="5" stroke-linecap="round" fill="none"/>
+  <!-- ── Right inner motion arc ── -->
+  <path d="M 184 88 Q 202 130 184 172"
+        stroke="rgba(255,255,255,0.18)" stroke-width="5" stroke-linecap="round" fill="none"/>
+
+  <!-- ── Center sensor disc ── -->
+  <circle cx="128" cy="140" r="30"
+          fill="url(#sensor-grad)" filter="url(#glow)"/>
+  <!-- sensor inner shine -->
+  <circle cx="128" cy="140" r="30" fill="url(#btn-inner)"/>
+  <!-- power / indicator dot -->
+  <circle cx="128" cy="134" r="8" fill="rgba(255,255,255,0.55)"/>
+
+  <!-- ── Small status LED dots (upper-right of sensor) ── -->
+  <circle cx="148" cy="120" r="4" fill="rgba(46,204,143,0.80)"/>
+  <circle cx="158" cy="116" r="3" fill="rgba(46,204,143,0.55)"/>
+  <circle cx="167" cy="114" r="2.5" fill="rgba(46,204,143,0.35)"/>
+
+  <!-- ── Outer motion sweep arcs (outside the disc, showing cleaning reach) ── -->
+  <path d="M 23 84  Q 4  130 23 176"
+        stroke="rgba(255,255,255,0.10)" stroke-width="4" stroke-linecap="round" fill="none"/>
+  <path d="M 233 84 Q 252 130 233 176"
+        stroke="rgba(255,255,255,0.10)" stroke-width="4" stroke-linecap="round" fill="none"/>
+</svg>

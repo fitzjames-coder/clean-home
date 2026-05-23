@@ -599,6 +599,28 @@ img { display: block; max-width: 100%; }
 }
 .back-btn:hover { opacity: 0.75; }
 
+/* ── Pill back button variant (Room Detail + Supplies) ── */
+.back-btn-pill {
+  min-height: 44px;
+  padding: 0 18px 0 14px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 2px 8px rgba(43, 127, 255, 0.12), 0 1px 3px rgba(0, 0, 0, 0.08);
+  backdrop-filter: blur(4px);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--blue);
+  transition: background 0.15s, box-shadow 0.15s, transform 0.10s;
+  border: 1px solid rgba(43, 127, 255, 0.14);
+  margin-bottom: 20px;
+}
+.back-btn-pill:hover {
+  background: var(--blue-pale);
+  box-shadow: 0 3px 12px rgba(43, 127, 255, 0.18);
+  opacity: 1;
+}
+.back-btn-pill:active { transform: scale(0.96); opacity: 1; }
+
 .back-btn-icon { font-size: 18px; line-height: 1; }
 
 .room-detail-hero {

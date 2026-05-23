@@ -1,0 +1,126 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+  <defs>
+    <!-- Table wood tones -->
+    <linearGradient id="table-top" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%"   stop-color="#C47A3A"/>
+      <stop offset="100%" stop-color="#9C5E25"/>
+    </linearGradient>
+    <linearGradient id="table-face" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%"   stop-color="#9C5E25"/>
+      <stop offset="100%" stop-color="#7A4518"/>
+    </linearGradient>
+    <linearGradient id="leg-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="#9C5E25"/>
+      <stop offset="50%"  stop-color="#B46E2E"/>
+      <stop offset="100%" stop-color="#7A4518"/>
+    </linearGradient>
+    <!-- Chair tones -->
+    <linearGradient id="chair-seat" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%"   stop-color="#A0896E"/>
+      <stop offset="100%" stop-color="#7A6654"/>
+    </linearGradient>
+    <linearGradient id="chair-face" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%"   stop-color="#7A6654"/>
+      <stop offset="100%" stop-color="#5E4E3E"/>
+    </linearGradient>
+    <linearGradient id="chair-back" x1="100%" y1="0%" x2="0%" y2="0%">
+      <stop offset="0%"   stop-color="#A0896E"/>
+      <stop offset="100%" stop-color="#7A6654"/>
+    </linearGradient>
+    <!-- Pendant -->
+    <linearGradient id="shade-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%"   stop-color="#E8A820"/>
+      <stop offset="100%" stop-color="#C88010"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="100%" r="70%">
+      <stop offset="0%"   stop-color="#FFF4A0" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#FFF4A0" stop-opacity="0.0"/>
+    </radialGradient>
+    <filter id="shadow" x="-12%" y="-12%" width="124%" height="124%">
+      <feDropShadow dx="1" dy="3" stdDeviation="5" flood-color="rgba(0,0,0,0.22)"/>
+    </filter>
+    <filter id="glow-f" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="5"/>
+    </filter>
+  </defs>
+
+  <!-- ══ PENDANT LIGHT ══ -->
+  <!-- Warm glow halo (blurred, below shade) -->
+  <ellipse cx="128" cy="78" rx="36" ry="22"
+           fill="#FFF2A0" opacity="0.45" filter="url(#glow-f)"/>
+  <!-- Wire -->
+  <line x1="128" y1="8" x2="128" y2="46"
+        stroke="#95A5A6" stroke-width="3" stroke-linecap="round"/>
+  <!-- Shade canopy top -->
+  <rect x="114" y="44" width="28" height="5" rx="2.5" fill="#B8860B"/>
+  <!-- Shade body (inverted trapezoid, wider at bottom) -->
+  <path d="M 110 49 L 118 49 L 126 76 L 130 76 L 138 49 L 146 49 L 136 82 L 120 82 Z"
+        fill="url(#shade-grad)" filter="url(#shadow)"/>
+  <!-- shade highlight -->
+  <path d="M 113 52 L 119 52 L 125 72"
+        stroke="rgba(255,255,255,0.30)" stroke-width="2" stroke-linecap="round" fill="none"/>
+  <!-- Bulb glow inside shade -->
+  <circle cx="128" cy="74" r="10" fill="#FFF5C0" opacity="0.80"/>
+
+  <!-- ══ LEFT CHAIR ══ -->
+  <!-- Chair back (vertical panel, outer edge left) -->
+  <rect x="16" y="56" width="22" height="70" rx="5"
+        fill="url(#chair-back)" filter="url(#shadow)"/>
+  <rect x="17" y="58" width="8" height="66" rx="4" fill="rgba(255,255,255,0.12)"/>
+  <!-- Chair back top rail -->
+  <rect x="16" y="54" width="46" height="10" rx="5"
+        fill="url(#chair-seat)" filter="url(#shadow)"/>
+  <!-- Chair seat (horizontal) -->
+  <rect x="16" y="108" width="68" height="14" rx="5"
+        fill="url(#chair-seat)" filter="url(#shadow)"/>
+  <!-- Chair seat 3D front edge -->
+  <rect x="16" y="120" width="68" height="7" rx="3"
+        fill="url(#chair-face)"/>
+  <!-- Chair legs -->
+  <rect x="20"  y="127" width="10" height="84" rx="4" fill="url(#leg-grad)"/>
+  <rect x="74"  y="127" width="10" height="84" rx="4" fill="url(#leg-grad)"/>
+  <!-- leg highlights -->
+  <rect x="21"  y="127" width="4" height="80" rx="2" fill="rgba(255,255,255,0.14)"/>
+  <rect x="75"  y="127" width="4" height="80" rx="2" fill="rgba(255,255,255,0.14)"/>
+
+  <!-- ══ RIGHT CHAIR (mirror) ══ -->
+  <!-- Chair back -->
+  <rect x="218" y="56" width="22" height="70" rx="5"
+        fill="url(#chair-back)" filter="url(#shadow)"/>
+  <rect x="218" y="58" width="8" height="66" rx="4" fill="rgba(255,255,255,0.12)"/>
+  <!-- Chair back top rail -->
+  <rect x="194" y="54" width="46" height="10" rx="5"
+        fill="url(#chair-seat)" filter="url(#shadow)"/>
+  <!-- Chair seat -->
+  <rect x="172" y="108" width="68" height="14" rx="5"
+        fill="url(#chair-seat)" filter="url(#shadow)"/>
+  <!-- Chair seat front edge -->
+  <rect x="172" y="120" width="68" height="7" rx="3"
+        fill="url(#chair-face)"/>
+  <!-- Chair legs -->
+  <rect x="176" y="127" width="10" height="84" rx="4" fill="url(#leg-grad)"/>
+  <rect x="230" y="127" width="10" height="84" rx="4" fill="url(#leg-grad)"/>
+  <rect x="177" y="127" width="4" height="80" rx="2" fill="rgba(255,255,255,0.14)"/>
+  <rect x="231" y="127" width="4" height="80" rx="2" fill="rgba(255,255,255,0.14)"/>
+
+  <!-- ══ DINING TABLE (on top of chair legs, in front) ══ -->
+  <!-- Table top surface -->
+  <rect x="62" y="100" width="132" height="16" rx="6"
+        fill="url(#table-top)" filter="url(#shadow)"/>
+  <!-- Table top highlight -->
+  <rect x="64" y="101" width="128" height="6" rx="3"
+        fill="rgba(255,255,255,0.22)"/>
+  <!-- Table apron / 3D front face -->
+  <rect x="62" y="116" width="132" height="14" rx="4"
+        fill="url(#table-face)"/>
+  <!-- Table legs -->
+  <rect x="78"  y="130" width="12" height="84" rx="5" fill="url(#leg-grad)" filter="url(#shadow)"/>
+  <rect x="166" y="130" width="12" height="84" rx="5" fill="url(#leg-grad)" filter="url(#shadow)"/>
+  <!-- leg highlights -->
+  <rect x="79"  y="130" width="5" height="80" rx="2.5" fill="rgba(255,255,255,0.16)"/>
+  <rect x="167" y="130" width="5" height="80" rx="2.5" fill="rgba(255,255,255,0.16)"/>
+  <!-- Table wood grain -->
+  <line x1="80"  y1="108" x2="100" y2="108" stroke="rgba(0,0,0,0.10)" stroke-width="2" stroke-linecap="round"/>
+  <line x1="108" y1="108" x2="148" y2="108" stroke="rgba(0,0,0,0.08)" stroke-width="2" stroke-linecap="round"/>
+  <line x1="156" y1="108" x2="176" y2="108" stroke="rgba(0,0,0,0.10)" stroke-width="2" stroke-linecap="round"/>
+</svg>

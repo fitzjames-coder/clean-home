@@ -4,9 +4,10 @@ import { ROOM_ICONS, TOOL_META, roomStatus, overdueToolsForRoom, formatLastClean
 import { supabase } from '../lib/supabase.js';
 import AddRoomModal from '../components/AddRoomModal.jsx';
 
+
 export default function HomeScreen() {
   const {
-    roomCode, rooms, goToRoom, goToSupplies, changeCode, setRooms,
+    roomCode, rooms, goToRoom, changeCode, setRooms,
   } = useApp();
 
   const [showAddRoom,     setShowAddRoom]     = useState(false);
@@ -145,16 +146,10 @@ export default function HomeScreen() {
 
       {/* ── FAB bar ── */}
       <div className="fab-bar">
-        <div className="fab-bar-inner">
-          <button className="fab-supplies" onClick={goToSupplies}>
-            <span className="fab-supplies-icon">🏷️</span>
-            Supplies
-          </button>
-          <button className="fab-add-room" onClick={() => setShowAddRoom(true)}>
-            <span>＋</span>
-            Add Room
-          </button>
-        </div>
+        <button className="fab-add-room" onClick={() => setShowAddRoom(true)}>
+          <span>＋</span>
+          Add Room
+        </button>
       </div>
 
       {/* ── Add room modal ── */}

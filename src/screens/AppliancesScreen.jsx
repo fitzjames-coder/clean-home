@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useApp } from '../context/AppContext.jsx';
 import { supabase } from '../lib/supabase.js';
 import {
@@ -7,6 +7,9 @@ import {
   applianceStatus,
   formatLastCleaned,
 } from '../lib/constants.js';
+
+// Thresholds for sort tiebreak (days past threshold → most overdue first)
+const APPL_THRESHOLDS = { W: 7, '2W': 14, M: 30, '3M': 90, '6M': 180, Y: 365 };
 
 export default function AppliancesScreen() {
   const {
@@ -17,6 +20,27 @@ export default function AppliancesScreen() {
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
   const [deletingId,      setDeletingId]      = useState(null);
   const [logoFailed,      setLogoFailed]      = useState(false);
+
+  // Sort appliances: critical → overdue → never → ok
+  // Tiebreak: most days past threshold first (never = treated as threshold days)
+  const sortedAppliances = useMemo(() => {
+    const STATUS_RANK = { critical: 0, overdue: 1, never: 2, ok: 3 };
+    function daysPastThreshold(appliance) {
+      if (!appliance.last_completed) {
+        return APPL_THRESHOLDS[appliance.frequency] ?? 30; // treat "never" as exactly at threshold
+      }
+      const threshold = APPL_THRESHOLDS[appliance.frequency] ?? 30;
+      const diffDays = (Date.now() - new Date(appliance.last_completed).getTime()) / 86400000;
+      return diffDays - threshold;
+    }
+    return [...appliances].sort((a, b) => {
+      const sa = applianceStatus(a);
+      const sb = applianceStatus(b);
+      const rankDiff = STATUS_RANK[sa] - STATUS_RANK[sb];
+      if (rankDiff !== 0) return rankDiff;
+      return daysPastThreshold(b) - daysPastThreshold(a);
+    });
+  }, [appliances]);
 
   async function handleDelete(id) {
     setDeletingId(id);
@@ -96,7 +120,7 @@ export default function AppliancesScreen() {
             </button>
           </div>
         ) : (
-          appliances.map(appliance => {
+          sortedAppliances.map(appliance => {
             const status     = applianceStatus(appliance);
             const statusClass = (status === 'overdue' || status === 'critical' || status === 'never')
               ? ` room-card-${status === 'critical' ? 'critical' : 'overdue'}`

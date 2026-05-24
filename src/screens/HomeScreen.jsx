@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useApp } from '../context/AppContext.jsx';
-import { ROOM_ICONS, TOOL_META, roomStatus, overdueToolsForRoom, formatLastCleaned } from '../lib/constants.js';
+import { ROOM_ICONS, TOOL_META, roomStatus, overdueToolsForRoom, formatLastCleaned, toolStatus } from '../lib/constants.js';
 import { supabase } from '../lib/supabase.js';
 import AddRoomModal from '../components/AddRoomModal.jsx';
 
@@ -14,6 +14,21 @@ export default function HomeScreen() {
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
   const [deletingId,      setDeletingId]      = useState(null);
   const [logoFailed,      setLogoFailed]      = useState(false);
+
+  // Sort rooms: critical → overdue → ok; tiebreak by most overdue-tool count desc
+  const sortedRooms = useMemo(() => {
+    const STATUS_RANK = { critical: 0, overdue: 1, ok: 2 };
+    return [...rooms].sort((a, b) => {
+      const sa = roomStatus(a.tools ?? []);
+      const sb = roomStatus(b.tools ?? []);
+      const rankDiff = STATUS_RANK[sa] - STATUS_RANK[sb];
+      if (rankDiff !== 0) return rankDiff;
+      // Tiebreak: more overdue/critical tools first
+      const aOverdue = (a.tools ?? []).filter(t => t.is_active && toolStatus(t.last_completed, t.frequency) !== 'ok').length;
+      const bOverdue = (b.tools ?? []).filter(t => t.is_active && toolStatus(t.last_completed, t.frequency) !== 'ok').length;
+      return bOverdue - aOverdue;
+    });
+  }, [rooms]);
 
   async function deleteRoom(id) {
     setDeletingId(id);
@@ -85,7 +100,7 @@ export default function HomeScreen() {
             <div className="empty-state-text">Add your first room to start tracking cleaning tasks.</div>
           </div>
         ) : (
-          rooms.map(room => {
+          sortedRooms.map(room => {
             const status = roomStatus(room.tools ?? []);
             const statusClass = status === 'ok' ? '' : ` room-card-${status}`;
             return (

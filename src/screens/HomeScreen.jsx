@@ -89,6 +89,7 @@ export default function HomeScreen() {
             const statusClass = status === 'ok' ? '' : ` room-card-${status}`;
             return (
             <div key={room.id} className={`room-card${statusClass}`}>
+              {/* Tappable area — navigates directly on single tap */}
               <button className="room-card-btn" onClick={() => goToRoom(room.id)}>
                 <div className="room-icon-wrap">{renderRoomIcon(room.icon)}</div>
                 <div className="room-info">
@@ -111,6 +112,7 @@ export default function HomeScreen() {
                 <div className="room-chevron">›</div>
               </button>
 
+              {/* Delete area — always visible, isolated from nav tap */}
               <div className="room-delete-area">
                 {confirmDeleteId === room.id ? (
                   <div className="room-confirm-delete">
@@ -129,8 +131,9 @@ export default function HomeScreen() {
                   <button
                     className="room-delete-btn"
                     onClick={e => { e.stopPropagation(); setConfirmDeleteId(room.id); }}
+                    title="Delete room"
                   >
-                    🗑️
+                    <img src="/trash-icon.png" alt="Delete" className="trash-icon" />
                   </button>
                 )}
               </div>

@@ -31,6 +31,71 @@ export const TOOL_ORDER = ['duster', 'broom', 'mop', 'vacuum', 'bot'];
 // Key used to persist the room code in localStorage
 export const ROOM_CODE_KEY = 'clean_home_room_code';
 
+// ── Appliance icons ───────────────────────────────────────────────────────────
+
+export const APPLIANCE_ICONS = {
+  stove:        { label: 'Stove',        iconUrl: '/appliance-icons/Stove.png' },
+  dryer:        { label: 'Dryer',        iconUrl: '/appliance-icons/Dryer.png' },
+  washer:       { label: 'Washer',       iconUrl: '/appliance-icons/Washer.png' },
+  dishwasher:   { label: 'Dishwasher',   iconUrl: '/appliance-icons/Dishwasher.png' },
+  refrigerator: { label: 'Refrigerator', iconUrl: '/appliance-icons/Refrigerator.png' },
+};
+
+// ── Appliance frequencies ─────────────────────────────────────────────────────
+
+export const APPLIANCE_FREQUENCY_OPTIONS = {
+  W:  { label: 'Weekly',      shortLabel: 'W'  },
+  '2W':{ label: 'Bi-weekly',  shortLabel: '2W' },
+  M:  { label: 'Monthly',     shortLabel: 'M'  },
+  '3M':{ label: 'Quarterly',  shortLabel: '3M' },
+  '6M':{ label: 'Half-yearly',shortLabel: '6M' },
+  Y:  { label: 'Yearly',      shortLabel: 'Y'  },
+};
+
+// Threshold in days for each appliance frequency
+const APPLIANCE_THRESHOLDS = {
+  W:   7,
+  '2W':14,
+  M:   30,
+  '3M':90,
+  '6M':180,
+  Y:   365,
+};
+
+// Grace period: how many days past threshold before escalating to 'critical'
+const APPLIANCE_GRACE = {
+  W:   2,
+  '2W':3,
+  M:   7,
+  '3M':14,
+  '6M':21,
+  Y:   30,
+};
+
+/**
+ * Returns 'never' | 'ok' | 'overdue' | 'critical' for a single appliance.
+ */
+export function applianceStatus(appliance) {
+  if (!appliance.last_completed) return 'never';
+  const threshold = APPLIANCE_THRESHOLDS[appliance.frequency] ?? 30;
+  const grace     = APPLIANCE_GRACE[appliance.frequency] ?? 7;
+  const diffDays  = (Date.now() - new Date(appliance.last_completed).getTime()) / 86400000;
+  if (diffDays < threshold)           return 'ok';
+  if (diffDays < threshold + grace)   return 'overdue';
+  return 'critical';
+}
+
+/**
+ * Returns true if any appliance in the array is overdue or critical.
+ * Used for the nav tab notification dot.
+ */
+export function anyApplianceOverdue(appliances) {
+  return appliances.some(a => {
+    const s = applianceStatus(a);
+    return s === 'overdue' || s === 'critical';
+  });
+}
+
 // ── Date helpers ─────────────────────────────────────────────────────────────
 
 export function isDue(lastCompleted, frequency) {

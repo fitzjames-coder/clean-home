@@ -7,29 +7,29 @@ const AppContext = createContext(null);
 // ─────────────────────────────────────────────────────────────────────────────
 // AppProvider
 //
-// Simple room-code scoping — no household table, no FK lookups, no joins.
-// Every row in clean_home_rooms and clean_home_supply_tags carries a plain
-// `room_code` text column. The code is stored in localStorage and used as
-// the filter for every SELECT/INSERT. This matches the Pantry app pattern.
-//
-// Screens: 'loading' | 'setup' | 'home' | 'room' | 'supplies'
+// Screens: 'loading' | 'setup' | 'home' | 'room' | 'appliances' |
+//          'appliance' | 'add-appliance' | 'supplies'
 // ─────────────────────────────────────────────────────────────────────────────
 
 export function AppProvider({ children }) {
-  const [screen,         setScreen]         = useState('loading');
-  const [selectedRoomId, setSelectedRoomId] = useState(null);
-  const [roomCode,       setRoomCode]       = useState(null);
-  const [rooms,          setRooms]          = useState([]);
-  const [supplies,       setSupplies]       = useState([]);
+  const [screen,              setScreen]              = useState('loading');
+  const [selectedRoomId,      setSelectedRoomId]      = useState(null);
+  const [selectedApplianceId, setSelectedApplianceId] = useState(null);
+  const [roomCode,            setRoomCode]            = useState(null);
+  const [rooms,               setRooms]               = useState([]);
+  const [appliances,          setAppliances]          = useState([]);
+  const [supplies,            setSupplies]            = useState([]);
 
   // ── Bootstrap ──────────────────────────────────────────────────────────────
   useEffect(() => {
     const saved = localStorage.getItem(ROOM_CODE_KEY);
     if (saved) {
       setRoomCode(saved);
-      Promise.all([fetchRooms(saved), fetchSupplies(saved)]).then(() => {
-        setScreen('home');
-      });
+      Promise.all([
+        fetchRooms(saved),
+        fetchAppliances(saved),
+        fetchSupplies(saved),
+      ]).then(() => setScreen('home'));
     } else {
       setScreen('setup');
     }
@@ -48,16 +48,12 @@ export function AppProvider({ children }) {
       .order('created_at',  { ascending: true });
     if (error) {
       console.error('[CleanHome] fetchRooms:', error);
-      // Do NOT overwrite state with [] on error — leave previous data intact
-      // so a transient DB failure doesn't blank the room list.
       alert(`[CleanHome] Failed to load rooms: ${error.message}\n\nCheck the browser console for details.`);
       return;
     }
 
     const rooms = data ?? [];
 
-    // Attach tools to each room so the home screen can compute overdue status
-    // without a per-room round-trip. One extra query for all rooms at once.
     if (rooms.length > 0) {
       const roomIds = rooms.map(r => r.id);
       const { data: toolData, error: toolErr } = await supabase
@@ -67,7 +63,6 @@ export function AppProvider({ children }) {
 
       if (toolErr) {
         console.error('[CleanHome] fetchRooms (tools):', toolErr);
-        // Non-fatal: badges simply won't show. Rooms still load.
       } else {
         const toolsByRoom = {};
         for (const tool of toolData ?? []) {
@@ -82,6 +77,49 @@ export function AppProvider({ children }) {
     setRooms(rooms);
   }
 
+  async function fetchAppliances(code) {
+    const c = code ?? roomCode;
+    if (!c) return;
+    const { data, error } = await supabase
+      .from('clean_home_appliances')
+      .select()
+      .eq('room_code', c)
+      .order('sort_order', { ascending: true })
+      .order('created_at',  { ascending: true });
+    if (error) {
+      console.error('[CleanHome] fetchAppliances:', error);
+      alert(`[CleanHome] Failed to load appliances: ${error.message}\n\nCheck the browser console for details.`);
+      return;
+    }
+
+    const rows = data ?? [];
+
+    // Bulk-fetch linked supply tags for all appliances
+    if (rows.length > 0) {
+      const appIds = rows.map(a => a.id);
+      const { data: linkData, error: linkErr } = await supabase
+        .from('clean_home_appliance_supplies')
+        .select('*, supply_tag:clean_home_supply_tags(*)')
+        .in('appliance_id', appIds);
+
+      if (linkErr) {
+        console.error('[CleanHome] fetchAppliances (supplies):', linkErr);
+      } else {
+        const byApp = {};
+        for (const link of linkData ?? []) {
+          (byApp[link.appliance_id] ??= []).push(link);
+        }
+        for (const row of rows) {
+          row.linked_supplies = byApp[row.id] ?? [];
+        }
+      }
+    } else {
+      for (const row of rows) row.linked_supplies = [];
+    }
+
+    setAppliances(rows);
+  }
+
   async function fetchSupplies(code) {
     const c = code ?? roomCode;
     if (!c) return;
@@ -92,17 +130,93 @@ export function AppProvider({ children }) {
       .order('name_en');
     if (error) {
       console.error('[CleanHome] fetchSupplies:', error);
-      // Do NOT overwrite state with [] on error — leave previous data intact.
       alert(`[CleanHome] Failed to load supplies: ${error.message}\n\nCheck the browser console for details.`);
       return;
     }
     setSupplies(data ?? []);
   }
 
+  // ── Appliance mutations ───────────────────────────────────────────────────
+
+  function addAppliance(appliance) {
+    setAppliances(prev => [...prev, { ...appliance, linked_supplies: [] }]);
+  }
+
+  function updateAppliance(id, updates) {
+    setAppliances(prev => prev.map(a => a.id === id ? { ...a, ...updates } : a));
+  }
+
+  function deleteAppliance(id) {
+    setAppliances(prev => prev.filter(a => a.id !== id));
+  }
+
+  async function markApplianceDone(id) {
+    const now = new Date().toISOString();
+    const { error } = await supabase
+      .from('clean_home_appliances')
+      .update({ last_completed: now })
+      .eq('id', id);
+    if (error) {
+      console.error('[CleanHome] markApplianceDone:', error);
+      alert(`Failed to mark appliance done: ${error.message}`);
+      return null;
+    }
+    updateAppliance(id, { last_completed: now });
+    return now;
+  }
+
+  async function undoApplianceCompletion(id, previousValue) {
+    const { error } = await supabase
+      .from('clean_home_appliances')
+      .update({ last_completed: previousValue })
+      .eq('id', id);
+    if (error) {
+      console.error('[CleanHome] undoApplianceCompletion:', error);
+      alert(`Failed to undo completion: ${error.message}`);
+      return;
+    }
+    updateAppliance(id, { last_completed: previousValue });
+  }
+
+  async function addApplianceSupply(applianceId, supplyTagId) {
+    const { data, error } = await supabase
+      .from('clean_home_appliance_supplies')
+      .insert({ appliance_id: applianceId, supply_tag_id: supplyTagId })
+      .select('*, supply_tag:clean_home_supply_tags(*)')
+      .single();
+    if (error) {
+      console.error('[CleanHome] addApplianceSupply:', error);
+      alert(`Failed to link supply: ${error.message}`);
+      return;
+    }
+    setAppliances(prev => prev.map(a =>
+      a.id === applianceId
+        ? { ...a, linked_supplies: [...(a.linked_supplies ?? []), data] }
+        : a
+    ));
+  }
+
+  async function removeApplianceSupply(applianceId, linkId) {
+    const { error } = await supabase
+      .from('clean_home_appliance_supplies')
+      .delete()
+      .eq('id', linkId);
+    if (error) {
+      console.error('[CleanHome] removeApplianceSupply:', error);
+      alert(`Failed to remove supply: ${error.message}`);
+      return;
+    }
+    setAppliances(prev => prev.map(a =>
+      a.id === applianceId
+        ? { ...a, linked_supplies: (a.linked_supplies ?? []).filter(ls => ls.id !== linkId) }
+        : a
+    ));
+  }
+
   // ── Navigation ─────────────────────────────────────────────────────────────
 
   async function goHome() {
-    await fetchRooms(); // always refresh before showing the list
+    await fetchRooms();
     setSelectedRoomId(null);
     setScreen('home');
   }
@@ -112,26 +226,42 @@ export function AppProvider({ children }) {
     setScreen('room');
   }
 
+  async function goToAppliances() {
+    await fetchAppliances();
+    setSelectedApplianceId(null);
+    setScreen('appliances');
+  }
+
+  function goToAppliance(applianceId) {
+    setSelectedApplianceId(applianceId);
+    setScreen('appliance');
+  }
+
+  function goToAddAppliance() {
+    setScreen('add-appliance');
+  }
+
   async function goToSupplies() {
     await fetchSupplies();
     setScreen('supplies');
   }
 
-  // Called by RoomCodeScreen when the user enters their code
   function onCodeSet(code) {
     const normalized = code.trim().toUpperCase();
     localStorage.setItem(ROOM_CODE_KEY, normalized);
     setRoomCode(normalized);
-    Promise.all([fetchRooms(normalized), fetchSupplies(normalized)]).then(() => {
-      setScreen('home');
-    });
+    Promise.all([
+      fetchRooms(normalized),
+      fetchAppliances(normalized),
+      fetchSupplies(normalized),
+    ]).then(() => setScreen('home'));
   }
 
-  // Clear the saved code and return to setup screen
   function changeCode() {
     localStorage.removeItem(ROOM_CODE_KEY);
     setRoomCode(null);
     setRooms([]);
+    setAppliances([]);
     setSupplies([]);
     setScreen('setup');
   }
@@ -140,21 +270,36 @@ export function AppProvider({ children }) {
   const value = {
     screen,
     selectedRoomId,
+    selectedApplianceId,
     roomCode,
     rooms,
+    appliances,
     supplies,
     // navigation
     goHome,
     goToRoom,
+    goToAppliances,
+    goToAppliance,
+    goToAddAppliance,
     goToSupplies,
     onCodeSet,
     changeCode,
-    // data refresh (used by screens after mutations)
+    // data refresh
     fetchRooms,
+    fetchAppliances,
     fetchSupplies,
-    // direct setters (used by screens for optimistic updates)
+    // direct setters (optimistic updates)
     setRooms,
+    setAppliances,
     setSupplies,
+    // appliance mutations
+    addAppliance,
+    updateAppliance,
+    deleteAppliance,
+    markApplianceDone,
+    undoApplianceCompletion,
+    addApplianceSupply,
+    removeApplianceSupply,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

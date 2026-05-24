@@ -18,7 +18,7 @@ export default function BottomNav({ activeTab, onTabChange }) {
         onClick={() => onTabChange('rooms')}
       >
         <div className="bottom-nav-icon-wrap">
-          <span className="bottom-nav-icon">🏠</span>
+          <img src="/rooms.png" alt="Rooms" className="nav-icon" />
           {roomsOverdue && <span className="bottom-nav-dot" />}
         </div>
         <span className="bottom-nav-label">Rooms</span>
@@ -44,7 +44,7 @@ export default function BottomNav({ activeTab, onTabChange }) {
         onClick={() => onTabChange('supplies')}
       >
         <div className="bottom-nav-icon-wrap">
-          <span className="bottom-nav-icon">🏷️</span>
+          <img src="/supplies.png" alt="Supplies" className="nav-icon" />
         </div>
         <span className="bottom-nav-label">Supplies</span>
       </button>

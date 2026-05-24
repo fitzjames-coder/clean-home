@@ -202,7 +202,7 @@ img { display: block; max-width: 100%; }
   max-width: 480px;
   background: var(--surface);
   border-radius: var(--radius-xl) var(--radius-xl) 0 0;
-  padding: 24px 24px 40px;
+  padding: 24px 24px calc(100px + env(safe-area-inset-bottom, 0px));
   max-height: 90vh;
   overflow-y: auto;
   animation: slideUp 0.25s ease-out;

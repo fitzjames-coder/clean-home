@@ -137,6 +137,9 @@ export default function AppliancesScreen() {
                 >
                   <div className="room-icon-wrap">
                     {renderIcon(appliance.icon)}
+                    {appliance.clean_time_minutes > 0 && (
+                      <span className="clean-time-pill--corner">{appliance.clean_time_minutes}m</span>
+                    )}
                   </div>
                   <div className="room-info">
                     <div className="room-name">{appliance.name}</div>

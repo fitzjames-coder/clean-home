@@ -27,7 +27,7 @@ export const FREQUENCY_META = {
   '2+W':{ label: 'Less Often', shortLabel: '2+W', description: 'Every few weeks or less' },
 };
 
-export const TOOL_ORDER = ['duster', 'broom', 'mop', 'vacuum', 'bot', 'wiping'];
+export const TOOL_ORDER = ['duster', 'wiping', 'broom', 'mop', 'vacuum', 'bot'];
 
 // Key used to persist the room code in localStorage
 export const ROOM_CODE_KEY = 'clean_home_room_code';

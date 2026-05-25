@@ -107,7 +107,12 @@ export default function HomeScreen() {
             <div key={room.id} className={`room-card${statusClass}`}>
               {/* Tappable area — navigates directly on single tap */}
               <button className="room-card-btn" onClick={() => goToRoom(room.id)}>
-                <div className="room-icon-wrap">{renderRoomIcon(room.icon)}</div>
+                <div className="room-icon-wrap">
+                  {renderRoomIcon(room.icon)}
+                  {room.clean_time_minutes > 0 && (
+                    <span className="clean-time-pill--corner">{room.clean_time_minutes}m</span>
+                  )}
+                </div>
                 <div className="room-info">
                   <div className="room-name">{room.name}</div>
                   {room.remarks ? (

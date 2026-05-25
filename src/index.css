@@ -446,6 +446,7 @@ img { display: block; max-width: 100%; }
   align-items: center;
   justify-content: center;
   font-size: 28px;
+  position: relative; /* anchors .clean-time-pill--corner */
 }
 
 .room-info { flex: 1; min-width: 0; }
@@ -729,6 +730,40 @@ img { display: block; max-width: 100%; }
 }
 .tool-freq-badge.due  { background: var(--blue-muted);  color: var(--blue); }
 .tool-freq-badge.done { background: var(--teal-pale); color: #1aaa72; }
+
+/* ── Clean-time pill ────────────────────────────────────────────────────── */
+/* In-flow variant — used on detail pages below the title */
+.clean-time-pill {
+  display: inline-flex;
+  align-items: center;
+  background: var(--blue-muted);
+  color: var(--blue);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 20px;
+  line-height: 1.4;
+  white-space: nowrap;
+  margin-top: 6px;
+}
+
+/* Corner variant — absolute-positioned over the icon tile on list cards */
+.clean-time-pill--corner {
+  position: absolute;
+  top: -5px;
+  left: -5px;
+  background: var(--blue-muted);
+  color: var(--blue);
+  font-size: 9px;
+  font-weight: 700;
+  padding: 2px 5px;
+  border-radius: 20px;
+  line-height: 1.4;
+  white-space: nowrap;
+  z-index: 2;
+  pointer-events: none;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.10);
+}
 
 .tool-last-cleaned {
   font-size: 12px;

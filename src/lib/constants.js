@@ -39,6 +39,7 @@ export const APPLIANCE_ICONS = {
   washer:       { label: 'Washer',       iconUrl: '/appliance-icons/Washer.png' },
   dishwasher:   { label: 'Dishwasher',   iconUrl: '/appliance-icons/Dishwasher.png' },
   refrigerator: { label: 'Refrigerator', iconUrl: '/appliance-icons/Refrigerator.png' },
+  microwave:    { label: 'Microwave',    iconUrl: '/appliance-icons/Microwave.png' },
 };
 
 // ── Appliance frequencies ─────────────────────────────────────────────────────

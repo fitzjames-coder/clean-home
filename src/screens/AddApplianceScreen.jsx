@@ -4,7 +4,7 @@ import { supabase } from '../lib/supabase.js';
 import { APPLIANCE_ICONS, APPLIANCE_FREQUENCY_OPTIONS } from '../lib/constants.js';
 
 const FREQ_ORDER     = ['W', '2W', 'M', '3M', '6M', 'Y'];
-const ICON_ORDER     = ['stove', 'dryer', 'washer', 'dishwasher', 'refrigerator'];
+const ICON_ORDER     = ['stove', 'dryer', 'washer', 'dishwasher', 'refrigerator', 'microwave'];
 const DEFAULT_FREQ   = 'M';
 const DEFAULT_ICON   = 'stove';
 

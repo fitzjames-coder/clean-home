@@ -174,7 +174,7 @@ export default function SupplyTagCard({ supply, onDelete, onUpdate }) {
             onClick={() => setEditing(true)}
             title="Edit"
           >
-            ✏️
+            <img src="/edit-icon.png" alt="Edit" className="trash-icon" />
           </button>
 
           {confirmDelete ? (
@@ -200,7 +200,7 @@ export default function SupplyTagCard({ supply, onDelete, onUpdate }) {
               onClick={() => setConfirmDelete(true)}
               title="Delete"
             >
-              🗑️
+              <img src="/trash-icon.png" alt="Delete" className="trash-icon" />
             </button>
           )}
         </div>

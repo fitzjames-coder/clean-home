@@ -8,13 +8,14 @@
 
 -- Rooms table
 CREATE TABLE IF NOT EXISTS clean_home_rooms (
-  id         UUID  DEFAULT gen_random_uuid() PRIMARY KEY,
-  room_code  TEXT  NOT NULL DEFAULT '',
-  name       TEXT  NOT NULL,
-  icon       TEXT  NOT NULL DEFAULT 'living-room',
-  remarks    TEXT  DEFAULT '',
-  sort_order INTEGER DEFAULT 0,          -- manually-added column; kept here so rebuilds match live DB
-  created_at TIMESTAMPTZ DEFAULT NOW()
+  id                 UUID  DEFAULT gen_random_uuid() PRIMARY KEY,
+  room_code          TEXT  NOT NULL DEFAULT '',
+  name               TEXT  NOT NULL,
+  icon               TEXT  NOT NULL DEFAULT 'living-room',
+  remarks            TEXT  DEFAULT '',
+  sort_order         INTEGER DEFAULT 0,          -- manually-added column; kept here so rebuilds match live DB
+  clean_time_minutes INTEGER,                    -- optional estimated clean time in minutes; applied via ALTER TABLE
+  created_at         TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- Tools table: one row per tool per room
@@ -53,16 +54,17 @@ CREATE TABLE IF NOT EXISTS clean_home_room_supplies (
 
 -- Appliances table — parallel to rooms, but each appliance is itself the cleanable thing
 CREATE TABLE IF NOT EXISTS clean_home_appliances (
-  id             UUID        DEFAULT gen_random_uuid() PRIMARY KEY,
-  room_code      TEXT        NOT NULL,
-  name           TEXT        NOT NULL,
-  icon           TEXT        NOT NULL,  -- e.g. 'stove' | 'dryer' | 'washer' | 'dishwasher' | 'refrigerator'
-  frequency      TEXT        NOT NULL DEFAULT 'M'
-                             CHECK (frequency IN ('W', '2W', 'M', '3M', '6M', 'Y')),
-  instructions   TEXT,
-  last_completed TIMESTAMPTZ,
-  sort_order     INTEGER     DEFAULT 0,
-  created_at     TIMESTAMPTZ DEFAULT NOW()
+  id                 UUID        DEFAULT gen_random_uuid() PRIMARY KEY,
+  room_code          TEXT        NOT NULL,
+  name               TEXT        NOT NULL,
+  icon               TEXT        NOT NULL,  -- e.g. 'stove' | 'dryer' | 'washer' | 'dishwasher' | 'refrigerator'
+  frequency          TEXT        NOT NULL DEFAULT 'M'
+                                 CHECK (frequency IN ('W', '2W', 'M', '3M', '6M', 'Y')),
+  instructions       TEXT,
+  last_completed     TIMESTAMPTZ,
+  sort_order         INTEGER     DEFAULT 0,
+  clean_time_minutes INTEGER,                    -- optional estimated clean time in minutes; applied via ALTER TABLE
+  created_at         TIMESTAMPTZ DEFAULT NOW()
   -- RLS disabled (matches all other clean_home_* tables)
 );
 

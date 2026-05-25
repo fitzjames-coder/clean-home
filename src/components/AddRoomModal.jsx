@@ -4,10 +4,11 @@ import { TOOL_ORDER, TOOL_META } from '../lib/constants.js';
 import RoomIconPicker from './RoomIconPicker.jsx';
 
 export default function AddRoomModal({ roomCode, onClose, onSuccess }) {
-  const [name,    setName]    = useState('');
-  const [icon,    setIcon]    = useState('living-room');
-  const [loading, setLoading] = useState(false);
-  const [error,   setError]   = useState('');
+  const [name,      setName]      = useState('');
+  const [icon,      setIcon]      = useState('living-room');
+  const [cleanTime, setCleanTime] = useState('');
+  const [loading,   setLoading]   = useState(false);
+  const [error,     setError]     = useState('');
 
   async function handleSubmit() {
     if (!name.trim()) { setError('Please enter a room name'); return; }
@@ -24,7 +25,13 @@ export default function AddRoomModal({ roomCode, onClose, onSuccess }) {
 
     try {
       // ── Step 1: Insert room ─────────────────────────────────────────────
-      const roomPayload = { room_code: roomCode, name: name.trim(), icon };
+      const parsedTime = parseInt(cleanTime, 10);
+      const roomPayload = {
+        room_code:          roomCode,
+        name:               name.trim(),
+        icon,
+        clean_time_minutes: (!isNaN(parsedTime) && parsedTime > 0) ? parsedTime : null,
+      };
       console.log('[CleanHome] AddRoomModal: inserting room…', roomPayload);
 
       const { data: room, error: roomErr } = await supabase
@@ -45,11 +52,11 @@ export default function AddRoomModal({ roomCode, onClose, onSuccess }) {
 
       console.log('[CleanHome] AddRoomModal: room created ✓', room);
 
-      // ── Step 2: Insert 5 default tools ─────────────────────────────────
+      // ── Step 2: Insert default tools ────────────────────────────────────
       const toolRows = TOOL_ORDER.map(tool_type => ({
         room_id:      room.id,
         tool_type,
-        tool_name:    TOOL_META[tool_type].label,   // 'Duster' | 'Broom' | 'Mop' | 'Vacuum' | 'Bot'
+        tool_name:    TOOL_META[tool_type].label,
         is_active:    true,
         frequency:    'W',
         instructions: '',
@@ -106,6 +113,23 @@ export default function AddRoomModal({ roomCode, onClose, onSuccess }) {
         <div className="field">
           <label className="field-label">Room Type</label>
           <RoomIconPicker value={icon} onChange={setIcon} />
+        </div>
+
+        <div className="field">
+          <label className="field-label">
+            Clean Time (minutes){' '}
+            <span style={{ fontWeight: 400, color: 'var(--text-muted)' }}>(optional)</span>
+          </label>
+          <input
+            className="input"
+            type="number"
+            inputMode="numeric"
+            min="1"
+            step="1"
+            placeholder="e.g. 45"
+            value={cleanTime}
+            onChange={e => setCleanTime(e.target.value)}
+          />
         </div>
 
         {error && (

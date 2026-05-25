@@ -14,6 +14,7 @@ export default function AddApplianceScreen() {
   const [name,         setName]         = useState('');
   const [icon,         setIcon]         = useState(DEFAULT_ICON);
   const [frequency,    setFrequency]    = useState(DEFAULT_FREQ);
+  const [cleanTime,    setCleanTime]    = useState('');
   const [instructions, setInstructions] = useState('');
   const [loading,      setLoading]      = useState(false);
   const [error,        setError]        = useState('');
@@ -26,12 +27,14 @@ export default function AddApplianceScreen() {
     setError('');
 
     try {
+      const parsedTime = parseInt(cleanTime, 10);
       const payload = {
-        room_code:    roomCode,
-        name:         name.trim(),
+        room_code:          roomCode,
+        name:               name.trim(),
         icon,
         frequency,
-        instructions: instructions.trim() || null,
+        clean_time_minutes: (!isNaN(parsedTime) && parsedTime > 0) ? parsedTime : null,
+        instructions:       instructions.trim() || null,
       };
 
       const { data, error: insertErr } = await supabase
@@ -127,6 +130,26 @@ export default function AddApplianceScreen() {
           </div>
           <div className="text-hint mt-1">
             {APPLIANCE_FREQUENCY_OPTIONS[frequency]?.label}
+          </div>
+        </section>
+
+        {/* Clean Time */}
+        <section>
+          <div className="field">
+            <label className="field-label">
+              Clean Time (minutes){' '}
+              <span style={{ fontWeight: 400, color: 'var(--text-muted)' }}>(optional)</span>
+            </label>
+            <input
+              className="input"
+              type="number"
+              inputMode="numeric"
+              min="1"
+              step="1"
+              placeholder="e.g. 45"
+              value={cleanTime}
+              onChange={e => setCleanTime(e.target.value)}
+            />
           </div>
         </section>
 

@@ -29,6 +29,9 @@ export default function ApplianceDetailScreen({ applianceId }) {
   const appliance = appliances.find(a => a.id === applianceId) ?? null;
 
   const [instructions,     setInstructions]     = useState(appliance?.instructions ?? '');
+  const [cleanTime,        setCleanTime]        = useState(
+    appliance?.clean_time_minutes != null ? String(appliance.clean_time_minutes) : ''
+  );
   const [savingInstr,      setSavingInstr]      = useState(false);
   const [marking,          setMarking]          = useState(false);
   const [confirmMark,      setConfirmMark]      = useState(false);
@@ -41,9 +44,14 @@ export default function ApplianceDetailScreen({ applianceId }) {
   const longPressTimer  = useRef(null);
   const undoFlashTimer  = useRef(null);
 
-  // Keep instructions field in sync when appliance changes
+  // Keep instructions and cleanTime in sync when appliance changes
   useEffect(() => {
-    if (appliance) setInstructions(appliance.instructions ?? '');
+    if (appliance) {
+      setInstructions(appliance.instructions ?? '');
+      setCleanTime(
+        appliance.clean_time_minutes != null ? String(appliance.clean_time_minutes) : ''
+      );
+    }
   }, [appliance?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!appliance) {
@@ -105,6 +113,21 @@ export default function ApplianceDetailScreen({ applianceId }) {
     if (error) console.error('[CleanHome] saveInstructions:', error);
     else updateAppliance(applianceId, { instructions });
     setSavingInstr(false);
+  }
+
+  // ── Clean Time ─────────────────────────────────────────────────────────────
+
+  async function saveCleanTime() {
+    const parsed  = parseInt(cleanTime, 10);
+    const value   = (!isNaN(parsed) && parsed > 0) ? parsed : null;
+    const current = appliance.clean_time_minutes ?? null;
+    if (value === current) return;
+    const { error } = await supabase
+      .from('clean_home_appliances')
+      .update({ clean_time_minutes: value })
+      .eq('id', applianceId);
+    if (error) console.error('[CleanHome] saveCleanTime:', error);
+    else updateAppliance(applianceId, { clean_time_minutes: value });
   }
 
   // ── Frequency ─────────────────────────────────────────────────────────────
@@ -174,6 +197,9 @@ export default function ApplianceDetailScreen({ applianceId }) {
           <div>
             <div className="room-detail-name">{appliance.name}</div>
             <div className="room-detail-type">{meta?.label ?? 'Appliance'}</div>
+            {appliance.clean_time_minutes > 0 && (
+              <span className="clean-time-pill">{appliance.clean_time_minutes}m</span>
+            )}
           </div>
         </div>
 
@@ -235,6 +261,27 @@ export default function ApplianceDetailScreen({ applianceId }) {
                 {APPLIANCE_FREQUENCY_OPTIONS[f]?.shortLabel ?? f}
               </button>
             ))}
+          </div>
+        </section>
+
+        {/* Clean Time */}
+        <section>
+          <div className="field">
+            <label className="field-label">
+              Clean Time (minutes){' '}
+              <span style={{ fontWeight: 400, color: 'var(--text-muted)' }}>(optional)</span>
+            </label>
+            <input
+              className="input"
+              type="number"
+              inputMode="numeric"
+              min="1"
+              step="1"
+              placeholder="e.g. 45"
+              value={cleanTime}
+              onChange={e => setCleanTime(e.target.value)}
+              onBlur={saveCleanTime}
+            />
           </div>
         </section>
 

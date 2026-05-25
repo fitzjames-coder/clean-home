@@ -13,11 +13,12 @@ export default function RoomDetailScreen({ roomId }) {
   const [linkedSupplies,  setLinkedSupplies]  = useState([]);
   const [remarks,         setRemarks]         = useState('');
   const [savingRemarks,   setSavingRemarks]   = useState(false);
+  const [cleanTime,       setCleanTime]       = useState('');
   const [loading,         setLoading]         = useState(true);
 
   // ── Supply-picker + detail modal state ────────────────────────────────────
   const [showSupplyPicker, setShowSupplyPicker] = useState(false);
-  const [detailSupply,     setDetailSupply]     = useState(null); // supply object | null
+  const [detailSupply,     setDetailSupply]     = useState(null);
 
   // ── Mark-all-done state ───────────────────────────────────────────────────
   const [confirmMarkAll, setConfirmMarkAll] = useState(false);
@@ -49,6 +50,11 @@ export default function RoomDetailScreen({ roomId }) {
       if (roomRes.data) {
         setRoom(roomRes.data);
         setRemarks(roomRes.data.remarks ?? '');
+        setCleanTime(
+          roomRes.data.clean_time_minutes != null
+            ? String(roomRes.data.clean_time_minutes)
+            : ''
+        );
       }
 
       if (toolsRes.data) {
@@ -80,6 +86,22 @@ export default function RoomDetailScreen({ roomId }) {
     if (error) console.error('[CleanHome] saveRemarks:', error);
     setRoom(prev => prev ? { ...prev, remarks } : prev);
     setSavingRemarks(false);
+  }
+
+  // ── Clean Time ─────────────────────────────────────────────────────────────
+
+  async function saveCleanTime() {
+    if (!room) return;
+    const parsed  = parseInt(cleanTime, 10);
+    const value   = (!isNaN(parsed) && parsed > 0) ? parsed : null;
+    const current = room.clean_time_minutes ?? null;
+    if (value === current) return;
+    const { error } = await supabase
+      .from('clean_home_rooms')
+      .update({ clean_time_minutes: value })
+      .eq('id', roomId);
+    if (error) console.error('[CleanHome] saveCleanTime:', error);
+    else setRoom(prev => prev ? { ...prev, clean_time_minutes: value } : prev);
   }
 
   // ── Back navigation ────────────────────────────────────────────────────────
@@ -179,6 +201,9 @@ export default function RoomDetailScreen({ roomId }) {
           <div>
             <div className="room-detail-name">{room.name}</div>
             <div className="room-detail-type">{roomMeta?.label ?? 'Room'}</div>
+            {room.clean_time_minutes > 0 && (
+              <span className="clean-time-pill">{room.clean_time_minutes}m</span>
+            )}
           </div>
         </div>
 
@@ -268,6 +293,27 @@ export default function RoomDetailScreen({ roomId }) {
               ))}
             </div>
           )}
+        </section>
+
+        {/* Clean Time */}
+        <section>
+          <div className="field">
+            <label className="field-label">
+              Clean Time (minutes){' '}
+              <span style={{ fontWeight: 400, color: 'var(--text-muted)' }}>(optional)</span>
+            </label>
+            <input
+              className="input"
+              type="number"
+              inputMode="numeric"
+              min="1"
+              step="1"
+              placeholder="e.g. 45"
+              value={cleanTime}
+              onChange={e => setCleanTime(e.target.value)}
+              onBlur={saveCleanTime}
+            />
+          </div>
         </section>
 
         {/* Remarks */}

@@ -79,7 +79,7 @@ export default function HomeScreen() {
 
             {roomCode && (
               <div className="home-household-btn">
-                <span>🔑</span>
+                <img src="/code-icon.png" alt="" className="code-icon" />
                 {roomCode}
               </div>
             )}

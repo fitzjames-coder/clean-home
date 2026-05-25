@@ -343,6 +343,14 @@ img { display: block; max-width: 100%; }
   color: var(--blue);
 }
 
+.code-icon {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  display: block;
+  flex-shrink: 0;
+}
+
 .settings-btn {
   padding: 10px;
   border-radius: var(--radius);

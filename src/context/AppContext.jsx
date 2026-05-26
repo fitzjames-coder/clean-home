@@ -136,6 +136,20 @@ export function AppProvider({ children }) {
     setSupplies(data ?? []);
   }
 
+  async function fetchToolHistory(toolId) {
+    const { data, error } = await supabase
+      .from('clean_home_tool_completions')
+      .select('completed_at')
+      .eq('tool_id', toolId)
+      .order('completed_at', { ascending: false })
+      .limit(5);
+    if (error) {
+      console.error('[CleanHome] fetchToolHistory:', error);
+      return [];
+    }
+    return (data ?? []).map(r => r.completed_at);
+  }
+
   // ── Appliance mutations ───────────────────────────────────────────────────
 
   function addAppliance(appliance) {
@@ -300,6 +314,8 @@ export function AppProvider({ children }) {
     undoApplianceCompletion,
     addApplianceSupply,
     removeApplianceSupply,
+    // tool history
+    fetchToolHistory,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

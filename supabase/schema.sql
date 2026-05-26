@@ -77,6 +77,16 @@ CREATE TABLE IF NOT EXISTS clean_home_appliance_supplies (
   UNIQUE(appliance_id, supply_tag_id)
 );
 
+-- Tool completion history — one row per mark-done event per tool
+-- SQL already applied via Supabase dashboard
+CREATE TABLE IF NOT EXISTS clean_home_tool_completions (
+  id           UUID        DEFAULT gen_random_uuid() PRIMARY KEY,
+  tool_id      UUID        NOT NULL REFERENCES clean_home_tools(id) ON DELETE CASCADE,
+  room_id      UUID        NOT NULL REFERENCES clean_home_rooms(id) ON DELETE CASCADE,
+  completed_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  created_at   TIMESTAMPTZ DEFAULT NOW()
+);
+
 -- Indexes for common queries
 CREATE INDEX IF NOT EXISTS idx_rooms_code               ON clean_home_rooms(room_code);
 CREATE INDEX IF NOT EXISTS idx_tools_room               ON clean_home_tools(room_id);
@@ -86,6 +96,7 @@ CREATE INDEX IF NOT EXISTS idx_room_supplies_tag        ON clean_home_room_suppl
 CREATE INDEX IF NOT EXISTS idx_appliances_code          ON clean_home_appliances(room_code);
 CREATE INDEX IF NOT EXISTS idx_appliance_supplies_app   ON clean_home_appliance_supplies(appliance_id);
 CREATE INDEX IF NOT EXISTS idx_appliance_supplies_tag   ON clean_home_appliance_supplies(supply_tag_id);
+CREATE INDEX IF NOT EXISTS idx_tool_completions_tool    ON clean_home_tool_completions(tool_id, completed_at DESC);
 
 -- Migration helpers (safe to run on a live DB that used the old household_id schema)
 -- ALTER TABLE clean_home_rooms ADD COLUMN IF NOT EXISTS room_code TEXT NOT NULL DEFAULT '';

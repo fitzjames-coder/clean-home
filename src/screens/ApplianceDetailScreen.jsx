@@ -23,6 +23,7 @@ export default function ApplianceDetailScreen({ applianceId }) {
     undoApplianceCompletion,
     addApplianceSupply,
     removeApplianceSupply,
+    fetchApplianceHistory,
   } = useApp();
 
   // Find appliance from context (already fetched at load time)
@@ -41,6 +42,10 @@ export default function ApplianceDetailScreen({ applianceId }) {
   const [showSupplyPicker, setShowSupplyPicker] = useState(false);
   const [detailSupply,     setDetailSupply]     = useState(null);
 
+  // ── Completion history state ──────────────────────────────────────────────
+  const [history,       setHistory]       = useState([]);
+  const [historyLoaded, setHistoryLoaded] = useState(false);
+
   const longPressTimer   = useRef(null);
   const cancelPressTimer = useRef(null);
   const undoFlashTimer   = useRef(null);
@@ -54,6 +59,15 @@ export default function ApplianceDetailScreen({ applianceId }) {
       );
     }
   }, [appliance?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Load completion history on mount (and if applianceId ever changes)
+  useEffect(() => {
+    if (!applianceId) return;
+    fetchApplianceHistory(applianceId).then(rows => {
+      setHistory(rows);
+      setHistoryLoaded(true);
+    });
+  }, [applianceId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!appliance) {
     return (
@@ -75,7 +89,11 @@ export default function ApplianceDetailScreen({ applianceId }) {
   async function handleMarkDone() {
     setMarking(true);
     setPrevCompleted(appliance.last_completed ?? null);
-    await markApplianceDone(applianceId);
+    const now = await markApplianceDone(applianceId);
+    // Optimistically update the in-memory history trail
+    if (now && historyLoaded) {
+      setHistory(prev => [now, ...prev].slice(0, 3));
+    }
     setMarking(false);
     setConfirmMark(false);
   }
@@ -90,6 +108,8 @@ export default function ApplianceDetailScreen({ applianceId }) {
       setPressing(false);
       await undoApplianceCompletion(applianceId, prevCompleted);
       setPrevCompleted(null);
+      // Optimistically remove the most recent history entry
+      if (historyLoaded) setHistory(prev => prev.slice(1));
       setUndoFlash(true);
       clearTimeout(undoFlashTimer.current);
       undoFlashTimer.current = setTimeout(() => setUndoFlash(false), 2000);
@@ -111,6 +131,8 @@ export default function ApplianceDetailScreen({ applianceId }) {
       await undoApplianceCompletion(applianceId, prevCompleted);
       setPrevCompleted(null);
       setConfirmMark(false);
+      // Optimistically remove the most recent history entry
+      if (historyLoaded) setHistory(prev => prev.slice(1));
       setUndoFlash(true);
       clearTimeout(undoFlashTimer.current);
       undoFlashTimer.current = setTimeout(() => setUndoFlash(false), 2000);
@@ -265,8 +287,24 @@ export default function ApplianceDetailScreen({ applianceId }) {
             {undoFlash ? (
               <div className="tool-undo-flash">↩ Undone</div>
             ) : (
-              <div className={`tool-last-cleaned ${lastClass}`} title={lastFull}>
-                {last}
+              <div className="appliance-last-cleaned-row">
+                <div className={`tool-last-cleaned ${lastClass}`} title={lastFull}>
+                  {last}
+                </div>
+                {history.length > 1 && (
+                  <div className="appliance-history-trail">
+                    {history.slice(1).map((ts, i) => {
+                      const d     = new Date(ts);
+                      const label = `${d.toLocaleString('default', { month: 'short' })} ${d.getDate()}`;
+                      return (
+                        <span key={ts}>
+                          {i > 0 && <span className="appliance-history-sep"> | </span>}
+                          {label}
+                        </span>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             )}
           </div>

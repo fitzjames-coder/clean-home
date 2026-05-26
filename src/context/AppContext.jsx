@@ -150,6 +150,20 @@ export function AppProvider({ children }) {
     return (data ?? []).map(r => r.completed_at);
   }
 
+  async function fetchApplianceHistory(applianceId) {
+    const { data, error } = await supabase
+      .from('clean_home_appliance_completions')
+      .select('completed_at')
+      .eq('appliance_id', applianceId)
+      .order('completed_at', { ascending: false })
+      .limit(3);
+    if (error) {
+      console.error('[CleanHome] fetchApplianceHistory:', error);
+      return [];
+    }
+    return (data ?? []).map(r => r.completed_at);
+  }
+
   // ── Appliance mutations ───────────────────────────────────────────────────
 
   function addAppliance(appliance) {
@@ -176,10 +190,26 @@ export function AppProvider({ children }) {
       return null;
     }
     updateAppliance(id, { last_completed: now });
+    // Write completion history row
+    await supabase.from('clean_home_appliance_completions').insert({
+      appliance_id: id,
+      completed_at: now,
+    });
     return now;
   }
 
   async function undoApplianceCompletion(id, previousValue) {
+    // Delete the most recent history row (guard: only if rows exist)
+    const { data: rows } = await supabase
+      .from('clean_home_appliance_completions')
+      .select('id')
+      .eq('appliance_id', id)
+      .order('completed_at', { ascending: false })
+      .limit(1);
+    if (rows?.length > 0) {
+      await supabase.from('clean_home_appliance_completions').delete().eq('id', rows[0].id);
+    }
+    // Revert last_completed
     const { error } = await supabase
       .from('clean_home_appliances')
       .update({ last_completed: previousValue })
@@ -316,6 +346,8 @@ export function AppProvider({ children }) {
     removeApplianceSupply,
     // tool history
     fetchToolHistory,
+    // appliance history
+    fetchApplianceHistory,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

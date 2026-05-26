@@ -4,14 +4,14 @@ import { supabase } from '../lib/supabase.js';
 import {
   APPLIANCE_ICONS,
   APPLIANCE_FREQUENCY_OPTIONS,
+  LONG_PRESS_UNDO_MS,
   applianceStatus,
   formatLastCleaned,
   formatLastCleanedFull,
 } from '../lib/constants.js';
 import SupplyDetailModal from '../components/SupplyDetailModal.jsx';
 
-const LONG_PRESS_MS = 2000;
-const FREQ_ORDER    = ['W', '2W', 'M', '3M', '6M', 'Y'];
+const FREQ_ORDER = ['W', '2W', 'M', '3M', '6M', 'Y'];
 
 export default function ApplianceDetailScreen({ applianceId }) {
   const {
@@ -41,8 +41,9 @@ export default function ApplianceDetailScreen({ applianceId }) {
   const [showSupplyPicker, setShowSupplyPicker] = useState(false);
   const [detailSupply,     setDetailSupply]     = useState(null);
 
-  const longPressTimer  = useRef(null);
-  const undoFlashTimer  = useRef(null);
+  const longPressTimer   = useRef(null);
+  const cancelPressTimer = useRef(null);
+  const undoFlashTimer   = useRef(null);
 
   // Keep instructions and cleanTime in sync when appliance changes
   useEffect(() => {
@@ -79,7 +80,7 @@ export default function ApplianceDetailScreen({ applianceId }) {
     setConfirmMark(false);
   }
 
-  // ── Long-press undo ───────────────────────────────────────────────────────
+  // ── Long-press undo (hero icon) ───────────────────────────────────────────
 
   function handlePressStart(e) {
     if (!appliance.last_completed) return;
@@ -92,13 +93,33 @@ export default function ApplianceDetailScreen({ applianceId }) {
       setUndoFlash(true);
       clearTimeout(undoFlashTimer.current);
       undoFlashTimer.current = setTimeout(() => setUndoFlash(false), 2000);
-    }, LONG_PRESS_MS);
+    }, LONG_PRESS_UNDO_MS);
   }
 
   function handlePressEnd() {
     clearTimeout(longPressTimer.current);
     longPressTimer.current = null;
     setPressing(false);
+  }
+
+  // ── Long-press undo (Cancel button) ──────────────────────────────────────
+
+  function handleCancelPressStart(e) {
+    if (!appliance.last_completed) return;
+    e.preventDefault();
+    cancelPressTimer.current = setTimeout(async () => {
+      await undoApplianceCompletion(applianceId, prevCompleted);
+      setPrevCompleted(null);
+      setConfirmMark(false);
+      setUndoFlash(true);
+      clearTimeout(undoFlashTimer.current);
+      undoFlashTimer.current = setTimeout(() => setUndoFlash(false), 2000);
+    }, LONG_PRESS_UNDO_MS);
+  }
+
+  function handleCancelPressEnd() {
+    clearTimeout(cancelPressTimer.current);
+    cancelPressTimer.current = null;
   }
 
   // ── Instructions ──────────────────────────────────────────────────────────
@@ -177,7 +198,7 @@ export default function ApplianceDetailScreen({ applianceId }) {
             onPointerCancel={handlePressEnd}
             title={
               appliance.last_completed
-                ? 'Tap to mark cleaned · Hold 2s to undo'
+                ? 'Tap to mark cleaned · Hold 1.5s to undo'
                 : 'Mark as cleaned'
             }
           >
@@ -212,6 +233,10 @@ export default function ApplianceDetailScreen({ applianceId }) {
                 className="btn btn-ghost"
                 style={{ padding: '8px 16px', fontSize: '13px' }}
                 onClick={() => setConfirmMark(false)}
+                onPointerDown={handleCancelPressStart}
+                onPointerUp={handleCancelPressEnd}
+                onPointerLeave={handleCancelPressEnd}
+                onPointerCancel={handleCancelPressEnd}
                 disabled={marking}
               >
                 Cancel
@@ -225,6 +250,7 @@ export default function ApplianceDetailScreen({ applianceId }) {
                 {marking ? 'Saving…' : '✓ Mark Done'}
               </button>
             </div>
+            <div className="appliance-undo-hint">long press to undo</div>
           </div>
         )}
       </div>

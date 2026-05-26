@@ -892,6 +892,31 @@ img { display: block; max-width: 100%; }
   gap: 14px;
 }
 
+/* ── Tool completion history ─────────────────────────────────────────────────── */
+
+.tool-history-section {
+  margin-top: 2px;
+}
+
+.tool-history-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 5px;
+}
+
+.tool-history-row {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.tool-history-sep {
+  opacity: 0.5;
+}
+
 /* ── Frequency selector ────────────────────────────────────────────────────── */
 .freq-selector {
   display: flex;

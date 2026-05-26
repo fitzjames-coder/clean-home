@@ -1,11 +1,14 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { supabase } from '../lib/supabase.js';
 import { TOOL_META, FREQUENCY_META, isDue, formatLastCleaned, formatLastCleanedFull } from '../lib/constants.js';
+import { useApp } from '../context/AppContext.jsx';
 import FrequencySelector from './FrequencySelector.jsx';
 
 const LONG_PRESS_MS = 2000;
 
 export default function ToolCard({ tool, onUpdate }) {
+  const { fetchToolHistory } = useApp();
+
   const [expanded,       setExpanded]       = useState(false);
   const [instructions,   setInstructions]   = useState(tool.instructions ?? '');
   const [savingInstr,    setSavingInstr]    = useState(false);
@@ -22,10 +25,23 @@ export default function ToolCard({ tool, onUpdate }) {
   const longPressTimer  = useRef(null);
   const undoFlashTimer  = useRef(null);
 
+  // ── History state ─────────────────────────────────────────────────────────
+  const [history,       setHistory]       = useState([]);
+  const [historyLoaded, setHistoryLoaded] = useState(false);
+
   const meta     = TOOL_META[tool.tool_type];
   const due      = isDue(tool.last_completed, tool.frequency);
   const last     = formatLastCleaned(tool.last_completed);
   const lastFull = formatLastCleanedFull(tool.last_completed);
+
+  // ── Load history when expanded ────────────────────────────────────────────
+  useEffect(() => {
+    if (!expanded || historyLoaded) return;
+    fetchToolHistory(tool.id).then(rows => {
+      setHistory(rows);
+      setHistoryLoaded(true);
+    });
+  }, [expanded, historyLoaded, tool.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Actions ──────────────────────────────────────────────────────────────
 
@@ -39,11 +55,37 @@ export default function ToolCard({ tool, onUpdate }) {
       .from('clean_home_tools')
       .update({ last_completed: now })
       .eq('id', tool.id);
-    if (!error) onUpdate({ last_completed: now });
+    if (!error) {
+      onUpdate({ last_completed: now });
+      // Write completion history row
+      await supabase.from('clean_home_tool_completions').insert({
+        tool_id:      tool.id,
+        room_id:      tool.room_id,
+        completed_at: now,
+      });
+      // Update in-memory history optimistically
+      if (historyLoaded) {
+        setHistory(prev => [now, ...prev].slice(0, 5));
+      }
+    }
     setMarkingDone(false);
   }
 
   async function undoMarkDone() {
+    // Delete most recent completion history row for this tool
+    const { data: rows } = await supabase
+      .from('clean_home_tool_completions')
+      .select('id')
+      .eq('tool_id', tool.id)
+      .order('completed_at', { ascending: false })
+      .limit(1);
+    if (rows?.length > 0) {
+      await supabase.from('clean_home_tool_completions').delete().eq('id', rows[0].id);
+      if (historyLoaded) {
+        setHistory(prev => prev.slice(1));
+      }
+    }
+
     // Revert to the stored previous value (null means "never cleaned")
     const prev = prevCompleted;
     const { error } = await supabase
@@ -235,6 +277,26 @@ export default function ToolCard({ tool, onUpdate }) {
             />
             {savingInstr && <div className="text-hint mt-1">Saving…</div>}
           </div>
+
+          {/* Completion history */}
+          {history.length > 0 && (
+            <div className="tool-history-section">
+              <div className="tool-history-label">History</div>
+              <div className="tool-history-row">
+                {history.map((ts, i) => {
+                  const d     = new Date(ts);
+                  const month = d.toLocaleString('default', { month: 'short' });
+                  const day   = d.getDate();
+                  return (
+                    <span key={ts}>
+                      {i > 0 && <span className="tool-history-sep"> | </span>}
+                      {month} {day}
+                    </span>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>

@@ -131,6 +131,12 @@ export default function RoomDetailScreen({ roomId }) {
         supabase.from('clean_home_tools').update({ last_completed: now }).eq('id', t.id)
       )
     );
+    // Batch-insert one completion history row per marked tool
+    if (toMark.length > 0) {
+      await supabase.from('clean_home_tool_completions').insert(
+        toMark.map(t => ({ tool_id: t.id, room_id: roomId, completed_at: now }))
+      );
+    }
     setTools(prev =>
       prev.map(t => (t.is_active && t.tool_type !== 'bot') ? { ...t, last_completed: now } : t)
     );

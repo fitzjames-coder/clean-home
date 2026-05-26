@@ -1373,6 +1373,30 @@ img { display: block; max-width: 100%; }
 .room-mark-all-actions { display: flex; gap: 8px; justify-content: flex-end; }
 .appliance-undo-hint   { font-size: 11px; color: var(--text-muted); text-align: center; margin-top: 2px; }
 
+/* ── Appliance completion history trail (Last Cleaned section) ─────────────── */
+
+.appliance-last-cleaned-row {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  justify-content: flex-start;
+  min-width: 0;
+}
+
+.appliance-history-trail {
+  font-size: 12px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.appliance-history-sep {
+  opacity: 0.5;
+  margin: 0 2px;
+}
+
 /* ─────────────────────────────────────────────────────────────────────────── */
 /* ROOM DETAIL — Supply Tags section                                            */
 /* ─────────────────────────────────────────────────────────────────────────── */

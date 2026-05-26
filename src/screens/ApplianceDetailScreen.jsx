@@ -83,8 +83,8 @@ export default function ApplianceDetailScreen({ applianceId }) {
   // ── Long-press undo (hero icon) ───────────────────────────────────────────
 
   function handlePressStart(e) {
+    e.preventDefault();             // always suppress native iOS image menu
     if (!appliance.last_completed) return;
-    e.preventDefault();
     setPressing(true);
     longPressTimer.current = setTimeout(async () => {
       setPressing(false);
@@ -209,7 +209,7 @@ export default function ApplianceDetailScreen({ applianceId }) {
                     alt={meta.label}
                     width={40}
                     height={40}
-                    className="room-icon-img"
+                    className="room-icon-img appliance-hero-icon"
                   />
                 : <span style={{ fontSize: 40 }}>🔌</span>
               }

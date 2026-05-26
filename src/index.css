@@ -1349,6 +1349,15 @@ img { display: block; max-width: 100%; }
 .room-hero-icon-btn:hover  { transform: scale(1.08); }
 .room-hero-icon-btn:active { transform: scale(0.95); }
 
+/* Suppress iOS Safari/Chrome native image context menu on the appliance
+   hero icon so the in-app long-press undo gesture fires without interruption */
+.appliance-hero-icon {
+  -webkit-touch-callout: none;
+  -webkit-user-select:   none;
+  user-select:           none;
+  touch-action:          manipulation;
+}
+
 /* confirmation panel beneath the hero */
 .room-mark-all-confirm {
   margin-top: 14px;

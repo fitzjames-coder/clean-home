@@ -12,12 +12,13 @@ export const ROOM_ICONS = [
 ];
 
 export const TOOL_META = {
-  duster: { label: 'Duster',     iconUrl: '/tool-icons/duster.png',  description: 'Dust surfaces, shelves, and decor' },
-  broom:  { label: 'Sweeping',   iconUrl: '/tool-icons/broom.png',   description: 'Sweep floors and corners' },
-  mop:    { label: 'Mopping',    iconUrl: '/tool-icons/mop.png',     description: 'Mop hard floors' },
-  vacuum: { label: 'Vacuum',     iconUrl: '/tool-icons/vacuum.png',  description: 'Vacuum carpets and rugs' },
-  bot:    { label: 'Vacuum Bot', iconUrl: '/tool-icons/bot.png',     description: 'Run robot vacuum or automated clean' },
-  wiping: { label: 'Wiping',     iconUrl: '/tool-icons/wiping.png',  description: 'Wipe down surfaces and countertops' },
+  duster:   { label: 'Duster',     iconUrl: '/tool-icons/duster.png',    description: 'Dust surfaces, shelves, and decor' },
+  broom:    { label: 'Sweeping',   iconUrl: '/tool-icons/broom.png',     description: 'Sweep floors and corners' },
+  mop:      { label: 'Mopping',    iconUrl: '/tool-icons/mop.png',       description: 'Mop hard floors' },
+  vacuum:   { label: 'Vacuum',     iconUrl: '/tool-icons/vacuum.png',    description: 'Vacuum carpets and rugs' },
+  bot:      { label: 'Vacuum Bot', iconUrl: '/tool-icons/bot.png',       description: 'Run robot vacuum or automated clean' },
+  wiping:   { label: 'Wiping',     iconUrl: '/tool-icons/wiping.png',    description: 'Wipe down surfaces and countertops' },
+  watering: { label: 'Watering',   iconUrl: '/tool-icons/watering.png',  description: 'Water plants' },
 };
 
 export const FREQUENCY_META = {
@@ -27,7 +28,7 @@ export const FREQUENCY_META = {
   '2+W':{ label: 'Less Often', shortLabel: '2+W', description: 'Every few weeks or less' },
 };
 
-export const TOOL_ORDER = ['duster', 'wiping', 'broom', 'mop', 'vacuum', 'bot'];
+export const TOOL_ORDER = ['duster', 'wiping', 'broom', 'mop', 'vacuum', 'bot', 'watering'];
 
 // Key used to persist the room code in localStorage
 export const ROOM_CODE_KEY = 'clean_home_room_code';
@@ -202,7 +203,7 @@ export function roomStatus(tools) {
 }
 
 /**
- * Returns active overdue/critical tools sorted by TOOL_ORDER, max 6.
+ * Returns active overdue/critical tools sorted by TOOL_ORDER, max 7.
  * Includes last_completed so callers can display the new date format.
  *
  * @returns {Array<{tool_type, frequency, last_completed}>}
@@ -211,6 +212,6 @@ export function overdueToolsForRoom(tools) {
   return tools
     .filter(t => t.is_active && toolStatus(t.last_completed, t.frequency) !== 'ok')
     .sort((a, b) => TOOL_ORDER.indexOf(a.tool_type) - TOOL_ORDER.indexOf(b.tool_type))
-    .slice(0, 6)
+    .slice(0, 7)
     .map(t => ({ tool_type: t.tool_type, frequency: t.frequency, last_completed: t.last_completed }));
 }

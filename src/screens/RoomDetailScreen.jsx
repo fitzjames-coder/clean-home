@@ -16,6 +16,9 @@ export default function RoomDetailScreen({ roomId }) {
   const [cleanTime,       setCleanTime]       = useState('');
   const [loading,         setLoading]         = useState(true);
 
+  // ── Inactive-section collapse state ──────────────────────────────────────
+  const [inactiveExpanded, setInactiveExpanded] = useState(false);
+
   // ── Supply-picker + detail modal state ────────────────────────────────────
   const [showSupplyPicker, setShowSupplyPicker] = useState(false);
   const [detailSupply,     setDetailSupply]     = useState(null);
@@ -243,13 +246,41 @@ export default function RoomDetailScreen({ roomId }) {
         <section>
           <div className="section-label">Cleaning Tools</div>
           <div className="tools-list">
-            {tools.map(tool => (
+            {/* Active tools */}
+            {tools.filter(t => t.is_active).map(tool => (
               <ToolCard
                 key={tool.id}
                 tool={tool}
                 onUpdate={partial => updateTool(tool.id, partial)}
               />
             ))}
+
+            {/* Collapsible inactive section */}
+            {(() => {
+              const inactive = tools.filter(t => !t.is_active);
+              if (inactive.length === 0) return null;
+              return (
+                <>
+                  <button
+                    className="inactive-section-header"
+                    onClick={() => setInactiveExpanded(v => !v)}
+                    aria-expanded={inactiveExpanded}
+                  >
+                    <span className={`inactive-section-header__arrow${inactiveExpanded ? ' expanded' : ''}`}>▶</span>
+                    <span className="inactive-section-header__count">
+                      Inactive ({inactive.length})
+                    </span>
+                  </button>
+                  {inactiveExpanded && inactive.map(tool => (
+                    <ToolCard
+                      key={tool.id}
+                      tool={tool}
+                      onUpdate={partial => updateTool(tool.id, partial)}
+                    />
+                  ))}
+                </>
+              );
+            })()}
           </div>
         </section>
 

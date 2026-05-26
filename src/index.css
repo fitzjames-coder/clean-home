@@ -682,6 +682,40 @@ img { display: block; max-width: 100%; }
   gap: 10px;
 }
 
+/* ── Collapsible inactive-tools section header ─────────────────────────────── */
+.inactive-section-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 4px;
+  background: none;
+  border: none;
+  border-top: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: left;
+  margin-top: 2px;
+}
+.inactive-section-header:hover { color: var(--text); }
+
+.inactive-section-header__arrow {
+  font-size: 10px;
+  transition: transform 0.2s ease;
+  display: inline-block;
+  flex-shrink: 0;
+}
+.inactive-section-header__arrow.expanded {
+  transform: rotate(90deg);
+}
+
+.inactive-section-header__count {
+  letter-spacing: 0.01em;
+}
+
 .tool-card {
   background: var(--surface);
   border: 1.5px solid var(--border);

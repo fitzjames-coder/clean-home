@@ -33,6 +33,9 @@ export const TOOL_ORDER = ['duster', 'wiping', 'broom', 'mop', 'vacuum', 'bot', 
 // Key used to persist the room code in localStorage
 export const ROOM_CODE_KEY = 'clean_home_room_code';
 
+// Long-press duration for undo gestures (tools + appliances)
+export const LONG_PRESS_UNDO_MS = 1500;
+
 // ── Appliance icons ───────────────────────────────────────────────────────────
 
 export const APPLIANCE_ICONS = {

@@ -1,10 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { supabase } from '../lib/supabase.js';
-import { TOOL_META, FREQUENCY_META, isDue, formatLastCleaned, formatLastCleanedFull } from '../lib/constants.js';
+import { TOOL_META, FREQUENCY_META, LONG_PRESS_UNDO_MS, isDue, formatLastCleaned, formatLastCleanedFull } from '../lib/constants.js';
 import { useApp } from '../context/AppContext.jsx';
 import FrequencySelector from './FrequencySelector.jsx';
-
-const LONG_PRESS_MS = 2000;
 
 export default function ToolCard({ tool, onUpdate }) {
   const { fetchToolHistory } = useApp();
@@ -139,7 +137,7 @@ export default function ToolCard({ tool, onUpdate }) {
     longPressTimer.current = setTimeout(() => {
       setPressing(false);
       undoMarkDone();
-    }, LONG_PRESS_MS);
+    }, LONG_PRESS_UNDO_MS);
   }
 
   function handlePressEnd() {

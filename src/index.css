@@ -1362,6 +1362,7 @@ img { display: block; max-width: 100%; }
 }
 .room-mark-all-text    { font-size: 14px; color: var(--text); line-height: 1.4; }
 .room-mark-all-actions { display: flex; gap: 8px; justify-content: flex-end; }
+.appliance-undo-hint   { font-size: 11px; color: var(--text-muted); text-align: center; margin-top: 2px; }
 
 /* ─────────────────────────────────────────────────────────────────────────── */
 /* ROOM DETAIL — Supply Tags section                                            */

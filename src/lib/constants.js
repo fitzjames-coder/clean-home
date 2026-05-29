@@ -39,12 +39,13 @@ export const LONG_PRESS_UNDO_MS = 1500;
 // ── Appliance icons ───────────────────────────────────────────────────────────
 
 export const APPLIANCE_ICONS = {
-  stove:        { label: 'Stove',        iconUrl: '/appliance-icons/Stove.png' },
-  dryer:        { label: 'Dryer',        iconUrl: '/appliance-icons/Dryer.png' },
-  washer:       { label: 'Washer',       iconUrl: '/appliance-icons/Washer.png' },
-  dishwasher:   { label: 'Dishwasher',   iconUrl: '/appliance-icons/Dishwasher.png' },
-  refrigerator: { label: 'Refrigerator', iconUrl: '/appliance-icons/Refrigerator.png' },
-  microwave:    { label: 'Microwave',    iconUrl: '/appliance-icons/Microwave.png' },
+  stove:             { label: 'Stove',             iconUrl: '/appliance-icons/Stove.png' },
+  dryer:             { label: 'Dryer',             iconUrl: '/appliance-icons/Dryer.png' },
+  washer:            { label: 'Washer',            iconUrl: '/appliance-icons/Washer.png' },
+  dishwasher:        { label: 'Dishwasher',        iconUrl: '/appliance-icons/Dishwasher.png' },
+  refrigerator:      { label: 'Refrigerator',      iconUrl: '/appliance-icons/Refrigerator.png' },
+  microwave:         { label: 'Microwave',         iconUrl: '/appliance-icons/Microwave.png' },
+  robot_vacuum_dock: { label: 'Robot Vacuum Dock', iconUrl: '/appliance-icons/Robot_vacuum_dock.png' },
 };
 
 // ── Appliance frequencies ─────────────────────────────────────────────────────
